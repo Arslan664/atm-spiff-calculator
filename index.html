@@ -1,0 +1,3303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abbott ATM | SPIF Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Abbott Brand */
+  --abbott-blue:    #0071C5;
+  --abbott-blue-dk: #005A9E;
+  --abbott-blue-lt: #E8F3FB;
+  --abbott-teal:    #00A3AD;
+  --abbott-teal-lt: #E0F5F6;
+
+  /* Neutrals */
+  --white:   #FFFFFF;
+  --gray-50: #F8F9FA;
+  --gray-100:#F1F3F5;
+  --gray-200:#E5E8EC;
+  --gray-300:#CDD1D6;
+  --gray-400:#9AA0A9;
+  --gray-500:#6B717A;
+  --gray-700:#3D4350;
+  --gray-900:#1A1F2E;
+
+  /* Semantic */
+  --success:     #0E8A5F;
+  --success-lt:  #E6F6F0;
+  --warn:        #B45309;
+  --warn-lt:     #FEF3E2;
+  --danger:      #C0392B;
+  --danger-lt:   #FDECEB;
+  --gold:        #D97706;
+  --gold-lt:     #FFFBEB;
+
+  /* Layout */
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+  --border:    #E5E8EC;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── PAGE LOAD ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fade-up { animation: fadeUp 0.45s ease both; }
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.10s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.20s; }
+.delay-5 { animation-delay: 0.25s; }
+
+/* ── HEADER ── */
+header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-left { display:flex; align-items:center; gap:20px; }
+
+.abbott-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-bar {
+  width: 4px; height: 28px;
+  background: linear-gradient(180deg, var(--abbott-blue) 0%, var(--abbott-teal) 100%);
+  border-radius: 2px;
+}
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--abbott-blue);
+  letter-spacing: -0.3px;
+}
+.logo-divider {
+  width: 1px; height: 28px;
+  background: var(--gray-200);
+}
+.header-subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-500);
+  letter-spacing: 0.5px;
+}
+
+.header-right { display:flex; align-items:center; gap:12px; }
+
+.ytd-chip {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--abbott-blue);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0,113,197,0.25);
+}
+.ytd-chip-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  opacity: 0.75;
+}
+.ytd-chip-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 600;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 40px;
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+  /* rate-strip already has margin-left:auto so export just needs auto on left */
+}
+
+.toolbar-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gray-400);
+  margin-right: 4px;
+}
+
+.select-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.select-wrap label {
+  position: absolute; left: 10px;
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--gray-400); pointer-events: none;
+  top: 5px;
+}
+.filter-select {
+  appearance: none;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-900);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 18px 32px 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239AA0A9' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  min-width: 160px;
+}
+.filter-select:hover { border-color: var(--abbott-blue); background-color: var(--white); }
+.filter-select:focus { outline: none; border-color: var(--abbott-blue); box-shadow: 0 0 0 3px rgba(0,113,197,0.12); background-color: var(--white); }
+.filter-select option { font-family: 'IBM Plex Sans', sans-serif; }
+
+.toolbar-sep {
+  width: 1px; height: 32px;
+  background: var(--gray-200); margin: 0 4px;
+}
+
+/* Rate indicator */
+.rate-strip {
+  display: flex; align-items: center; gap: 6px;
+  margin-left: auto;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+}
+.rate-item { display:flex; align-items:center; gap:5px; }
+.rate-dot { width:6px; height:6px; border-radius:50%; }
+.rate-dot.base { background: var(--success); }
+.rate-dot.over { background: var(--gold); }
+.rate-dot.max  { background: var(--danger); }
+.rate-text { font-size: 11px; color: var(--gray-500); }
+.rate-val  { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--gray-700); }
+.rate-sep  { width:1px; height:16px; background: var(--gray-200); }
+
+/* ── MAIN ── */
+.main { padding: 28px 40px; max-width: 1440px; margin: 0 auto; }
+
+/* ── QUARTER GRID ── */
+.quarters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ── CARD ── */
+.q-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.q-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.q-card-header {
+  padding: 14px 18px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--gray-100);
+}
+.q-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--gray-900);
+  font-weight: 600;
+}
+.q-card-header-right {
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Achievement badge */
+.ach-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 50px;
+  letter-spacing: 0.3px;
+}
+.ach-none    { background: var(--gray-100); color: var(--gray-400); border: 1px solid var(--gray-200); }
+.ach-low     { background: var(--danger-lt); color: var(--danger); border: 1px solid #F5C6C2; }
+.ach-mid     { background: var(--warn-lt);  color: var(--warn);   border: 1px solid #F5DDB8; }
+.ach-hit     { background: var(--success-lt); color: var(--success); border: 1px solid #B2DFD0; }
+.ach-over    { background: var(--gold-lt);  color: var(--gold);   border: 1px solid #F5E2B8; }
+
+/* Quarter accent line */
+.q-accent { height: 3px; }
+.q1 .q-accent { background: var(--abbott-blue); }
+.q2 .q-accent { background: var(--abbott-teal); }
+.q3 .q-accent { background: #5BA4CF; }
+.q4 .q-accent { background: var(--gold); }
+
+/* Input area */
+.q-inputs { padding: 14px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+.input-group { display:flex; flex-direction:column; gap:4px; }
+.input-label-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.input-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--gray-400);
+}
+.input-hint { font-size: 10px; color: var(--gray-300); }
+
+.num-input {
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-900);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  text-align: center;
+  transition: all 0.15s;
+  -moz-appearance: textfield;
+}
+.num-input::-webkit-outer-spin-button,
+.num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.num-input::placeholder { color: var(--gray-300); font-size: 18px; }
+.num-input.target { border-color: rgba(0,113,197,0.3); }
+.num-input.actual { border-color: rgba(0,163,173,0.3); }
+.num-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,113,197,0.10);
+}
+.num-input.target:focus { border-color: var(--abbott-blue); }
+.num-input.actual:focus { border-color: var(--abbott-teal); }
+
+/* Progress */
+.q-progress { padding: 0 18px 12px; }
+.progress-header { display:flex; justify-content:space-between; margin-bottom:5px; }
+.progress-title { font-size: 10px; font-weight: 500; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; }
+.progress-pct   { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: var(--gray-700); }
+.progress-track {
+  height: 5px;
+  background: var(--gray-100);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+.fill-base { background: linear-gradient(90deg, var(--abbott-blue), var(--abbott-teal)); }
+.fill-over { background: linear-gradient(90deg, var(--abbott-teal), var(--gold)); }
+.fill-max  { background: linear-gradient(90deg, var(--gold), var(--danger)); }
+
+/* Breakdown table */
+.q-breakdown { padding: 0 18px; }
+.breakdown-row {
+  display: flex; align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.breakdown-row:last-child { border-bottom: none; }
+.bd-label  { flex: 1; font-size: 11px; color: var(--gray-500); font-weight: 400; }
+.bd-units  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gray-400); margin-right: 10px; min-width: 52px; text-align: right; }
+.bd-amount { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; min-width: 64px; text-align: right; }
+.bd-base   { color: var(--abbott-blue); }
+.bd-over   { color: var(--gold); }
+.bd-max    { color: var(--danger); }
+
+/* Card footer */
+.q-footer {
+  margin: 10px 18px 14px;
+  background: var(--abbott-blue-lt);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.q-footer-label { font-size: 11px; font-weight: 600; color: var(--abbott-blue-dk); text-transform: uppercase; letter-spacing: 0.5px; }
+.q-footer-value { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; color: var(--abbott-blue); }
+
+/* ── BOTTOM PANEL ── */
+.bottom-panel {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+
+/* ── CHART CARD ── */
+.chart-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.card-title {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+
+/* Bar chart */
+.bar-chart-wrap {
+  display: flex; align-items: flex-end; gap: 12px;
+  height: 120px;
+  margin-bottom: 20px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.bar-stack {
+  width: 100%; display: flex; flex-direction: column-reverse;
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+  transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  min-height: 3px;
+}
+.seg-base { background: var(--abbott-blue); transition: height 0.4s ease; }
+.seg-over { background: var(--gold);         transition: height 0.4s ease; }
+.seg-max  { background: var(--danger);       transition: height 0.4s ease; }
+.bar-lbl  { font-size: 10px; font-weight: 600; color: var(--gray-400); letter-spacing: 0.3px; }
+.bar-amt  { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gray-600); font-weight: 500; }
+
+/* Legend */
+.chart-legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+.legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--gray-500); }
+.legend-dot { width:8px; height:8px; border-radius:2px; }
+
+/* Summary table under chart */
+.summary-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+}
+.summary-cell {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.sc-title { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 6px; }
+.sc-row { display:flex; justify-content:space-between; align-items:center; padding: 2px 0; }
+.sc-label { font-size: 10px; color: var(--gray-500); }
+.sc-val   { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
+
+/* ── SUMMARY CARD ── */
+.summary-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column;
+}
+
+.summary-card-top {
+  background: linear-gradient(135deg, var(--abbott-blue) 0%, var(--abbott-teal) 100%);
+  padding: 24px 22px 20px;
+  position: relative; overflow: hidden;
+}
+.summary-card-top::after {
+  content: '';
+  position: absolute; right: -30px; top: -30px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+}
+.sc-top-label {
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 4px;
+}
+.sc-top-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; color: white;
+  margin-bottom: 16px; opacity: 0.9;
+}
+.sc-ytd-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); }
+.sc-ytd-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 34px; font-weight: 600; color: white;
+  line-height: 1.1; margin-top: 2px;
+}
+.sc-ytd-value small { font-size: 18px; opacity: 0.65; }
+
+.summary-card-body { padding: 16px 20px; flex: 1; }
+.q-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.q-row:last-child { border-bottom: none; }
+.q-row-left { display:flex; align-items:center; gap:8px; }
+.q-dot { width: 8px; height: 8px; border-radius: 2px; }
+.q-row-label { font-size: 12px; color: var(--gray-600); font-weight: 500; }
+.q-row-value { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--gray-800); }
+
+/* Confetti (subtle, professional) */
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-80px) rotate(360deg); opacity: 0; }
+}
+.cp { position:absolute; width:5px; height:5px; border-radius:1px; animation: confettiFall 1.2s ease-out forwards; pointer-events:none; }
+
+/* Pulse */
+@keyframes numPulse {
+  0% { color: inherit; }
+  40% { color: var(--abbott-blue); transform: scale(1.06); }
+  100% { color: inherit; transform: scale(1); }
+}
+.pulse { animation: numPulse 0.3s ease; }
+
+/* No match notice */
+.no-match {
+  background: var(--danger-lt);
+  border: 1px solid #F5C6C2;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 12px; color: var(--danger);
+  margin-bottom: 14px; display: none;
+}
+
+/* ── COMMENT PANEL ── */
+.comment-toggle {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 18px;
+  font-size:11px; font-weight:600; color:var(--gray-400);
+  cursor:pointer; border-top:1px solid var(--gray-100);
+  transition:all 0.15s; user-select:none;
+  letter-spacing:0.3px;
+}
+.comment-toggle:hover { background:var(--gray-50); color:var(--abbott-blue); }
+.comment-badge {
+  background:var(--abbott-blue); color:#fff;
+  font-size:9px; font-weight:700;
+  border-radius:50%; width:16px; height:16px;
+  display:inline-flex; align-items:center; justify-content:center;
+  margin-left:2px;
+}
+.comment-panel {
+  padding:0 14px 14px;
+  animation: fadeUp 0.2s ease;
+}
+.comment-existing {
+  background:var(--gray-50); border:1px solid var(--gray-200);
+  border-radius:var(--radius-sm); padding:10px 12px;
+  font-size:12px; color:var(--gray-700); line-height:1.6;
+  margin-bottom:8px; display:none;
+}
+.comment-existing .comment-meta {
+  font-size:10px; font-weight:600; color:var(--abbott-blue);
+  text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;
+}
+.comment-existing .comment-text { color:var(--gray-700); }
+.comment-textarea {
+  width:100%; border:1.5px solid var(--gray-200);
+  border-radius:var(--radius-sm); padding:8px 10px;
+  font-family:'IBM Plex Sans',sans-serif; font-size:12px;
+  color:var(--gray-900); resize:vertical; transition:all 0.15s;
+}
+.comment-textarea:focus { outline:none; border-color:var(--abbott-blue); box-shadow:0 0 0 3px rgba(0,113,197,0.10); }
+.comment-save-btn {
+  background:var(--abbott-blue); color:#fff; border:none;
+  padding:5px 12px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:600;
+  cursor:pointer; transition:all 0.15s;
+}
+.comment-save-btn:hover { background:var(--abbott-blue-dk); }
+.comment-clear-btn {
+  background:var(--gray-100); color:var(--gray-500); border:1px solid var(--gray-200);
+  padding:5px 10px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:600;
+  cursor:pointer; transition:all 0.15s;
+}
+.comment-clear-btn:hover { background:var(--danger-lt); color:var(--danger); border-color:#F5C6C2; }
+
+/* ── SAVED REPORTS PANEL ── */
+.saved-panel {
+  position:fixed; top:0; right:-420px; width:400px; height:100vh;
+  background:var(--white); border-left:1px solid var(--border);
+  box-shadow:-4px 0 24px rgba(0,0,0,0.08);
+  z-index:500; transition:right 0.3s cubic-bezier(0.4,0,0.2,1);
+  display:flex; flex-direction:column;
+}
+.saved-panel.open { right:0; }
+.saved-panel-header {
+  padding:20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.saved-panel-title { font-family:'Playfair Display',serif; font-size:18px; }
+.saved-panel-close {
+  background:none; border:none; cursor:pointer; color:var(--gray-400);
+  font-size:20px; line-height:1; padding:2px 6px;
+}
+.saved-panel-close:hover { color:var(--gray-900); }
+.saved-panel-body { flex:1; overflow-y:auto; padding:16px; }
+.saved-report-card {
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  padding:14px; margin-bottom:10px; cursor:pointer;
+  transition:all 0.15s;
+}
+.saved-report-card:hover { border-color:var(--abbott-blue); background:var(--abbott-blue-lt); }
+.src-name { font-weight:600; font-size:13px; color:var(--gray-900); margin-bottom:2px; }
+.src-meta { font-size:11px; color:var(--gray-400); margin-bottom:6px; }
+.src-ytd  { font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; color:var(--abbott-blue); }
+.src-actions { display:flex; gap:6px; margin-top:8px; }
+.src-load-btn {
+  flex:1; background:var(--abbott-blue); color:#fff; border:none;
+  padding:5px 0; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:600; cursor:pointer;
+}
+.src-del-btn {
+  background:var(--gray-100); color:var(--gray-500); border:1px solid var(--gray-200);
+  padding:5px 10px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:11px; cursor:pointer;
+}
+.src-del-btn:hover { background:var(--danger-lt); color:var(--danger); }
+.saved-empty { text-align:center; color:var(--gray-400); padding:40px 20px; font-size:13px; }
+
+/* ── EMAIL MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(26,31,46,0.5);
+  z-index:600; display:none; align-items:center; justify-content:center;
+  backdrop-filter:blur(2px);
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--white); border-radius:var(--radius-lg);
+  padding:28px; width:480px; max-width:92vw;
+  box-shadow:var(--shadow-lg);
+  animation:fadeUp 0.25s ease;
+}
+.modal-title { font-family:'Playfair Display',serif; font-size:20px; margin-bottom:4px; }
+.modal-sub   { font-size:12px; color:var(--gray-400); margin-bottom:20px; }
+.modal-field { margin-bottom:14px; }
+.modal-field label { display:block; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--gray-400); margin-bottom:5px; }
+.modal-input {
+  width:100%; border:1.5px solid var(--gray-200); border-radius:var(--radius-sm);
+  padding:9px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:13px;
+  color:var(--gray-900); transition:all 0.15s;
+}
+.modal-input:focus { outline:none; border-color:var(--abbott-blue); box-shadow:0 0 0 3px rgba(0,113,197,0.10); }
+.modal-preview {
+  background:var(--gray-50); border:1px solid var(--gray-200);
+  border-radius:var(--radius-sm); padding:12px; font-size:12px;
+  color:var(--gray-600); line-height:1.7; max-height:180px; overflow-y:auto;
+  font-family:'IBM Plex Mono',monospace; margin-bottom:16px;
+}
+.modal-footer { display:flex; gap:8px; justify-content:flex-end; }
+.modal-cancel {
+  background:var(--gray-100); color:var(--gray-600); border:1px solid var(--gray-200);
+  padding:8px 16px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer;
+}
+.modal-send {
+  background:var(--abbott-blue); color:#fff; border:none;
+  padding:8px 20px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+}
+.modal-send:hover { background:var(--abbott-blue-dk); }
+.modal-outlook {
+  background:var(--abbott-teal-lt); color:var(--abbott-teal); border:1.5px solid rgba(0,163,173,0.25);
+  padding:8px 16px; border-radius:var(--radius-sm);
+  font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer;
+}
+
+/* Toast notification */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--gray-900); color:#fff; padding:10px 20px;
+  border-radius:50px; font-size:12px; font-weight:600;
+  z-index:1000; transition:transform 0.3s ease; pointer-events:none;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* Saved reports trigger button in header */
+.reports-btn {
+  display:flex; align-items:center; gap:5px;
+  background:var(--gray-100); border:1.5px solid var(--gray-200);
+  color:var(--gray-600); font-family:'IBM Plex Sans',sans-serif;
+  font-size:11px; font-weight:600; padding:7px 12px; border-radius:var(--radius-sm);
+  cursor:pointer; white-space:nowrap; transition:all 0.15s; position:relative;
+}
+.reports-btn:hover { background:var(--gray-200); color:var(--gray-900); }
+.reports-count {
+  position:absolute; top:-5px; right:-5px;
+  background:var(--abbott-blue); color:#fff;
+  font-size:9px; font-weight:700; border-radius:50%;
+  width:16px; height:16px; display:flex; align-items:center; justify-content:center;
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .quarters-grid { grid-template-columns: repeat(2,1fr); }
+  .bottom-panel  { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .quarters-grid { grid-template-columns: 1fr; }
+  header, .toolbar, .main { padding-left: 16px; padding-right: 16px; }
+  .rate-strip { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="fade-up">
+  <div class="header-left">
+    <div class="abbott-logo">
+      <div class="logo-bar"></div>
+      <div class="logo-text">Abbott</div>
+    </div>
+    <div class="logo-divider"></div>
+    <div class="header-subtitle">ATM · SPIF Calculator</div>
+  </div>
+  <div class="header-right">
+    <!-- Rep name input -->
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <label style="font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);">Your Name</label>
+      <input id="repName" type="text" placeholder="Enter your name…" style="
+        border:1.5px solid var(--gray-200);background:var(--white);
+        color:var(--gray-900);font-family:'IBM Plex Sans',sans-serif;
+        font-size:13px;font-weight:500;padding:6px 10px;
+        border-radius:var(--radius-sm);width:170px;transition:all 0.15s;
+      " onfocus="this.style.borderColor='var(--abbott-blue)';this.style.boxShadow='0 0 0 3px rgba(0,113,197,0.10)'"
+         onblur="this.style.borderColor='var(--gray-200)';this.style.boxShadow='none'">
+    </div>
+
+    <!-- Action buttons -->
+    <button onclick="saveReport()" title="Save report to local storage" style="
+      display:flex;align-items:center;gap:5px;
+      background:var(--abbott-blue-lt);border:1.5px solid rgba(0,113,197,0.2);
+      color:var(--abbott-blue);font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px;font-weight:600;padding:7px 12px;border-radius:var(--radius-sm);
+      cursor:pointer;white-space:nowrap;transition:all 0.15s;
+    " onmouseover="this.style.background='#D0E8F7'" onmouseout="this.style.background='var(--abbott-blue-lt)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Report
+    </button>
+
+    <button onclick="openEmailModal()" title="Send report by email" style="
+      display:flex;align-items:center;gap:5px;
+      background:var(--abbott-teal-lt);border:1.5px solid rgba(0,163,173,0.2);
+      color:var(--abbott-teal);font-family:'IBM Plex Sans',sans-serif;
+      font-size:11px;font-weight:600;padding:7px 12px;border-radius:var(--radius-sm);
+      cursor:pointer;white-space:nowrap;transition:all 0.15s;
+    " onmouseover="this.style.background='#C0EBEE'" onmouseout="this.style.background='var(--abbott-teal-lt)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Send Email
+    </button>
+
+    <button class="reports-btn" onclick="openSavedPanel()" title="View saved reports">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Saved Reports
+      <span class="reports-count" id="reportsCount" style="display:none">0</span>
+    </button>
+
+    <div class="ytd-chip">
+      <div>
+        <div class="ytd-chip-label">YTD Earnings</div>
+        <div class="ytd-chip-value" id="headerYTD">$0</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── TOOLBAR ── -->
+<div class="toolbar fade-up delay-1">
+  <span class="toolbar-label">Filters</span>
+
+  <!-- Role select hidden — controlled by popup, shown as read-only badge -->
+  <select id="roleSelect" onchange="applyFilters()" style="display:none;">
+    <option value="Sales Rep">Sales Rep</option>
+    <option value="Coaching People Manager">Coaching People Manager</option>
+  </select>
+  <!-- Role badge (read-only, shows active role) -->
+  <div id="roleBadge" style="
+    display:flex;align-items:center;gap:5px;
+    background:var(--abbott-blue-lt);border:1px solid rgba(0,113,197,0.2);
+    border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--abbott-blue);
+    white-space:nowrap;
+  ">
+    <span id="roleBadgeIcon">👤</span>
+    <span id="roleBadgeText">Sales Rep</span>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="select-wrap">
+    <label>Account</label>
+    <select class="filter-select" id="accountSelect" onchange="applyFilters()">
+      <option value="New Account">New Account</option>
+      <option value="Existing">Existing</option>
+    </select>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="select-wrap">
+    <label>Business Type</label>
+    <select class="filter-select" id="businessSelect" onchange="applyFilters()">
+      <option value="Purchase">Purchase</option>
+      <option value="Placement">Placement</option>
+    </select>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="select-wrap">
+    <label>Instrument</label>
+    <select class="filter-select" id="instrumentSelect" onchange="applyFilters()">
+      <option value="ID Now ">ID Now</option>
+      <option value="Digival">Digival</option>
+    </select>
+  </div>
+
+  <!-- Upload zone — always visible -->
+  <div id="uploadZone" title="Click or drag your Excel Ref file to load live rates" style="
+    display:flex; align-items:center; gap:7px;
+    background:#F0F9FF; border:1.5px dashed #BAE6FD;
+    border-radius:6px; padding:5px 12px; cursor:pointer;
+    font-size:11px; font-weight:600; color:#0369A1;
+    transition:all 0.15s; margin-left:4px; white-space:nowrap;
+  " onmouseover="this.style.background='#E0F2FE';this.style.borderColor='#38BDF8'" 
+     onmouseout="this.style.background='#F0F9FF';this.style.borderColor='#BAE6FD'">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span id="uploadZoneLabel">Load Excel Rates</span>
+  </div>
+
+  <!-- Live rates -->
+  <div class="rate-strip">
+    <div class="rate-item">
+      <div class="rate-dot base"></div>
+      <span class="rate-text">≤100%</span>
+      <span class="rate-val" id="rateBase">—</span>
+    </div>
+    <div class="rate-sep"></div>
+    <div class="rate-item">
+      <div class="rate-dot over"></div>
+      <span class="rate-text">100–200%</span>
+      <span class="rate-val" id="rateOver">—</span>
+    </div>
+    <div class="rate-sep"></div>
+    <div class="rate-item">
+      <div class="rate-dot max"></div>
+      <span class="rate-text">>200%</span>
+      <span class="rate-val" id="rateMax">—</span>
+    </div>
+  </div>
+
+  <!-- Export Excel button -->
+  <div id="exportBtn" onclick="exportToExcel()" title="Export results to Excel (.xlsx)" style="
+    margin-left:auto;
+    display:flex; align-items:center; gap:6px;
+    background:#0071C5; border:none;
+    border-radius:6px; padding:7px 14px; cursor:pointer;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:11px; font-weight:600; color:#ffffff;
+    letter-spacing:0.3px; white-space:nowrap;
+    box-shadow:0 2px 8px rgba(0,113,197,0.25); transition:all 0.15s;
+  " onmouseover="this.style.background='#005A9E'" onmouseout="this.style.background='#0071C5'">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export Excel
+  </div>
+
+  <!-- Export PDF button — right next to Excel -->
+  <div id="exportPdfBtn" onclick="downloadPdfOnly()" title="Export full page as PDF" style="
+    display:flex; align-items:center; gap:6px;
+    background:#C0392B; border:none;
+    border-radius:6px; padding:7px 14px; cursor:pointer;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:11px; font-weight:600; color:#ffffff;
+    letter-spacing:0.3px; white-space:nowrap;
+    box-shadow:0 2px 8px rgba(192,57,43,0.25); transition:all 0.15s;
+  " onmouseover="this.style.background='#A93226'" onmouseout="this.style.background='#C0392B'">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    Export PDF
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <div id="noMatchMsg" class="no-match">
+    No SPIF rate found for this combination. Verify your filter selection matches the Ref table.
+  </div>
+
+  <!-- Quarter cards -->
+  <div class="quarters-grid">
+
+    <!-- Q1 -->
+    <div class="q-card q1 fade-up delay-2">
+      <div class="q-accent"></div>
+      <div class="q-card-header">
+        <div class="q-card-title">Quarter 1</div>
+        <div class="q-card-header-right">
+          <div class="ach-badge ach-none" id="achBadge-q1">—</div>
+        </div>
+      </div>
+      <div class="q-inputs">
+        <div class="input-group">
+          <div class="input-label-row">
+            <span class="input-label">Target</span>
+            <span class="input-hint">units</span>
+          </div>
+          <input class="num-input target" type="number" id="target-q1" min="0" placeholder="0" oninput="recalc('q1')">
+        </div>
+        <div class="input-group">
+          <div class="input-label-row">
+            <span class="input-label">Actual</span>
+            <span class="input-hint">units</span>
+          </div>
+          <input class="num-input actual" type="number" id="actual-q1" min="0" placeholder="0" oninput="recalc('q1')">
+        </div>
+      </div>
+      <div class="q-progress">
+        <div class="progress-header">
+          <span class="progress-title">Achievement</span>
+          <span class="progress-pct" id="pct-q1">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-base" id="prog-q1" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-breakdown">
+        <div class="breakdown-row">
+          <span class="bd-label">Achievement @ 100%</span>
+          <span class="bd-units" id="units100-q1">—</span>
+          <span class="bd-amount bd-base" id="spiff100-q1">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (100–200%)</span>
+          <span class="bd-units" id="unitsOver-q1">—</span>
+          <span class="bd-amount bd-over" id="spiffOver-q1">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (&gt;200%)</span>
+          <span class="bd-units" id="unitsMax-q1">—</span>
+          <span class="bd-amount bd-max" id="spiffMax-q1">$0</span>
+        </div>
+      </div>
+      <div class="q-footer">
+        <span class="q-footer-label">Q1 Total Earnings</span>
+        <span class="q-footer-value" id="qtotal-q1">$0</span>
+      </div>
+      <!-- Manager Comment Panel Q1 -->
+      <div class="comment-toggle" onclick="toggleComment('q1')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="commentToggleLabel-q1">Manager Comment</span>
+        <span id="commentBadge-q1" class="comment-badge" style="display:none">1</span>
+      </div>
+      <div class="comment-panel" id="commentPanel-q1" style="display:none">
+        <div class="comment-existing" id="commentDisplay-q1"></div>
+        <div id="commentInputWrap-q1" style="display:none">
+          <textarea class="comment-textarea" id="commentInput-q1" placeholder="Add your comment as manager…" rows="3"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="comment-save-btn" onclick="saveComment('q1')">Save Comment</button>
+            <button class="comment-clear-btn" onclick="clearComment('q1')">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-card q2 fade-up delay-3">
+      <div class="q-accent"></div>
+      <div class="q-card-header">
+        <div class="q-card-title">Quarter 2</div>
+        <div class="q-card-header-right">
+          <div class="ach-badge ach-none" id="achBadge-q2">—</div>
+        </div>
+      </div>
+      <div class="q-inputs">
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Target</span><span class="input-hint">units</span></div>
+          <input class="num-input target" type="number" id="target-q2" min="0" placeholder="0" oninput="recalc('q2')">
+        </div>
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Actual</span><span class="input-hint">units</span></div>
+          <input class="num-input actual" type="number" id="actual-q2" min="0" placeholder="0" oninput="recalc('q2')">
+        </div>
+      </div>
+      <div class="q-progress">
+        <div class="progress-header">
+          <span class="progress-title">Achievement</span>
+          <span class="progress-pct" id="pct-q2">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-base" id="prog-q2" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-breakdown">
+        <div class="breakdown-row">
+          <span class="bd-label">Achievement @ 100%</span>
+          <span class="bd-units" id="units100-q2">—</span>
+          <span class="bd-amount bd-base" id="spiff100-q2">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (100–200%)</span>
+          <span class="bd-units" id="unitsOver-q2">—</span>
+          <span class="bd-amount bd-over" id="spiffOver-q2">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (&gt;200%)</span>
+          <span class="bd-units" id="unitsMax-q2">—</span>
+          <span class="bd-amount bd-max" id="spiffMax-q2">$0</span>
+        </div>
+      </div>
+      <div class="q-footer">
+        <span class="q-footer-label">Q2 Total Earnings</span>
+        <span class="q-footer-value" id="qtotal-q2">$0</span>
+      </div>
+      <div class="comment-toggle" onclick="toggleComment('q2')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="commentToggleLabel-q2">Manager Comment</span>
+        <span id="commentBadge-q2" class="comment-badge" style="display:none">1</span>
+      </div>
+      <div class="comment-panel" id="commentPanel-q2" style="display:none">
+        <div class="comment-existing" id="commentDisplay-q2"></div>
+        <div id="commentInputWrap-q2" style="display:none">
+          <textarea class="comment-textarea" id="commentInput-q2" placeholder="Add your comment as manager…" rows="3"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="comment-save-btn" onclick="saveComment('q2')">Save Comment</button>
+            <button class="comment-clear-btn" onclick="clearComment('q2')">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-card q3 fade-up delay-4">
+      <div class="q-accent"></div>
+      <div class="q-card-header">
+        <div class="q-card-title">Quarter 3</div>
+        <div class="q-card-header-right">
+          <div class="ach-badge ach-none" id="achBadge-q3">—</div>
+        </div>
+      </div>
+      <div class="q-inputs">
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Target</span><span class="input-hint">units</span></div>
+          <input class="num-input target" type="number" id="target-q3" min="0" placeholder="0" oninput="recalc('q3')">
+        </div>
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Actual</span><span class="input-hint">units</span></div>
+          <input class="num-input actual" type="number" id="actual-q3" min="0" placeholder="0" oninput="recalc('q3')">
+        </div>
+      </div>
+      <div class="q-progress">
+        <div class="progress-header">
+          <span class="progress-title">Achievement</span>
+          <span class="progress-pct" id="pct-q3">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-base" id="prog-q3" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-breakdown">
+        <div class="breakdown-row">
+          <span class="bd-label">Achievement @ 100%</span>
+          <span class="bd-units" id="units100-q3">—</span>
+          <span class="bd-amount bd-base" id="spiff100-q3">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (100–200%)</span>
+          <span class="bd-units" id="unitsOver-q3">—</span>
+          <span class="bd-amount bd-over" id="spiffOver-q3">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (&gt;200%)</span>
+          <span class="bd-units" id="unitsMax-q3">—</span>
+          <span class="bd-amount bd-max" id="spiffMax-q3">$0</span>
+        </div>
+      </div>
+      <div class="q-footer">
+        <span class="q-footer-label">Q3 Total Earnings</span>
+        <span class="q-footer-value" id="qtotal-q3">$0</span>
+      </div>
+      <div class="comment-toggle" onclick="toggleComment('q3')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="commentToggleLabel-q3">Manager Comment</span>
+        <span id="commentBadge-q3" class="comment-badge" style="display:none">1</span>
+      </div>
+      <div class="comment-panel" id="commentPanel-q3" style="display:none">
+        <div class="comment-existing" id="commentDisplay-q3"></div>
+        <div id="commentInputWrap-q3" style="display:none">
+          <textarea class="comment-textarea" id="commentInput-q3" placeholder="Add your comment as manager…" rows="3"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="comment-save-btn" onclick="saveComment('q3')">Save Comment</button>
+            <button class="comment-clear-btn" onclick="clearComment('q3')">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-card q4 fade-up delay-5">
+      <div class="q-accent"></div>
+      <div class="q-card-header">
+        <div class="q-card-title">Quarter 4</div>
+        <div class="q-card-header-right">
+          <div class="ach-badge ach-none" id="achBadge-q4">—</div>
+        </div>
+      </div>
+      <div class="q-inputs">
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Target</span><span class="input-hint">units</span></div>
+          <input class="num-input target" type="number" id="target-q4" min="0" placeholder="0" oninput="recalc('q4')">
+        </div>
+        <div class="input-group">
+          <div class="input-label-row"><span class="input-label">Actual</span><span class="input-hint">units</span></div>
+          <input class="num-input actual" type="number" id="actual-q4" min="0" placeholder="0" oninput="recalc('q4')">
+        </div>
+      </div>
+      <div class="q-progress">
+        <div class="progress-header">
+          <span class="progress-title">Achievement</span>
+          <span class="progress-pct" id="pct-q4">—</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-base" id="prog-q4" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-breakdown">
+        <div class="breakdown-row">
+          <span class="bd-label">Achievement @ 100%</span>
+          <span class="bd-units" id="units100-q4">—</span>
+          <span class="bd-amount bd-base" id="spiff100-q4">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (100–200%)</span>
+          <span class="bd-units" id="unitsOver-q4">—</span>
+          <span class="bd-amount bd-over" id="spiffOver-q4">$0</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="bd-label">Over Target (&gt;200%)</span>
+          <span class="bd-units" id="unitsMax-q4">—</span>
+          <span class="bd-amount bd-max" id="spiffMax-q4">$0</span>
+        </div>
+      </div>
+      <div class="q-footer">
+        <span class="q-footer-label">Q4 Total Earnings</span>
+        <span class="q-footer-value" id="qtotal-q4">$0</span>
+      </div>
+      <div class="comment-toggle" onclick="toggleComment('q4')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="commentToggleLabel-q4">Manager Comment</span>
+        <span id="commentBadge-q4" class="comment-badge" style="display:none">1</span>
+      </div>
+      <div class="comment-panel" id="commentPanel-q4" style="display:none">
+        <div class="comment-existing" id="commentDisplay-q4"></div>
+        <div id="commentInputWrap-q4" style="display:none">
+          <textarea class="comment-textarea" id="commentInput-q4" placeholder="Add your comment as manager…" rows="3"></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <button class="comment-save-btn" onclick="saveComment('q4')">Save Comment</button>
+            <button class="comment-clear-btn" onclick="clearComment('q4')">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /quarters-grid -->
+
+  <!-- ── BOTTOM PANEL ── -->
+  <div class="bottom-panel">
+
+    <!-- Chart + summary table -->
+    <div class="chart-card fade-up delay-3">
+      <div class="card-title">Quarterly Earnings Breakdown</div>
+
+      <div class="bar-chart-wrap" id="barChart">
+        <div class="bar-group" onmouseenter="showBarTip(event,'q1')" onmouseleave="hideBarTip()">
+          <div class="bar-amt" id="bc-amt-q1">$0</div>
+          <div class="bar-stack" id="bc-stack-q1" style="height:3px">
+            <div class="seg-max"  id="bc-max-q1"  style="height:0"></div>
+            <div class="seg-over" id="bc-over-q1" style="height:0"></div>
+            <div class="seg-base" id="bc-base-q1" style="height:3px"></div>
+          </div>
+          <div class="bar-lbl">Q1</div>
+        </div>
+        <div class="bar-group" onmouseenter="showBarTip(event,'q2')" onmouseleave="hideBarTip()">
+          <div class="bar-amt" id="bc-amt-q2">$0</div>
+          <div class="bar-stack" id="bc-stack-q2" style="height:3px">
+            <div class="seg-max"  id="bc-max-q2"  style="height:0"></div>
+            <div class="seg-over" id="bc-over-q2" style="height:0"></div>
+            <div class="seg-base" id="bc-base-q2" style="height:3px"></div>
+          </div>
+          <div class="bar-lbl">Q2</div>
+        </div>
+        <div class="bar-group" onmouseenter="showBarTip(event,'q3')" onmouseleave="hideBarTip()">
+          <div class="bar-amt" id="bc-amt-q3">$0</div>
+          <div class="bar-stack" id="bc-stack-q3" style="height:3px">
+            <div class="seg-max"  id="bc-max-q3"  style="height:0"></div>
+            <div class="seg-over" id="bc-over-q3" style="height:0"></div>
+            <div class="seg-base" id="bc-base-q3" style="height:3px"></div>
+          </div>
+          <div class="bar-lbl">Q3</div>
+        </div>
+        <div class="bar-group" onmouseenter="showBarTip(event,'q4')" onmouseleave="hideBarTip()">
+          <div class="bar-amt" id="bc-amt-q4">$0</div>
+          <div class="bar-stack" id="bc-stack-q4" style="height:3px">
+            <div class="seg-max"  id="bc-max-q4"  style="height:0"></div>
+            <div class="seg-over" id="bc-over-q4" style="height:0"></div>
+            <div class="seg-base" id="bc-base-q4" style="height:3px"></div>
+          </div>
+          <div class="bar-lbl">Q4</div>
+        </div>
+
+        <!-- Floating tooltip -->
+        <div id="barTooltip" style="
+          display:none; position:fixed; z-index:9999;
+          background:#1A1F2E; color:#fff;
+          border-radius:8px; padding:12px 15px;
+          font-family:'IBM Plex Sans',sans-serif; font-size:12px;
+          box-shadow:0 8px 24px rgba(0,0,0,0.18);
+          pointer-events:none; min-width:170px;
+          border:1px solid rgba(255,255,255,0.08);
+        ">
+          <div id="btTitle" style="font-weight:600;font-size:13px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;"></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:#9AA0A9;">Base (≤100%)</span>
+            <span id="btBase" style="font-family:'IBM Plex Mono',monospace;color:#0071C5;font-weight:600;"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="color:#9AA0A9;">Over (100–200%)</span>
+            <span id="btOver" style="font-family:'IBM Plex Mono',monospace;color:#D97706;font-weight:600;"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="color:#9AA0A9;">Max (&gt;200%)</span>
+            <span id="btMax"  style="font-family:'IBM Plex Mono',monospace;color:#C0392B;font-weight:600;"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.1);padding-top:7px;">
+            <span style="color:#fff;font-weight:600;">Total</span>
+            <span id="btTotal" style="font-family:'IBM Plex Mono',monospace;color:#fff;font-weight:700;font-size:14px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--abbott-blue)"></div>Base Tier (≤100%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Over Achievement (100–200%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Max Tier (&gt;200%)</div>
+      </div>
+
+      <!-- Per-quarter summary -->
+      <div class="summary-grid">
+        <div class="summary-cell">
+          <div class="sc-title" style="color:var(--abbott-blue);">Q1</div>
+          <div class="sc-row"><span class="sc-label">Base</span><span class="sc-val bd-base" id="sc-base-q1">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Over</span><span class="sc-val bd-over" id="sc-over-q1">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Max</span><span class="sc-val bd-max"  id="sc-max-q1">$0</span></div>
+        </div>
+        <div class="summary-cell">
+          <div class="sc-title" style="color:var(--abbott-teal);">Q2</div>
+          <div class="sc-row"><span class="sc-label">Base</span><span class="sc-val bd-base" id="sc-base-q2">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Over</span><span class="sc-val bd-over" id="sc-over-q2">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Max</span><span class="sc-val bd-max"  id="sc-max-q2">$0</span></div>
+        </div>
+        <div class="summary-cell">
+          <div class="sc-title" style="color:#5BA4CF;">Q3</div>
+          <div class="sc-row"><span class="sc-label">Base</span><span class="sc-val bd-base" id="sc-base-q3">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Over</span><span class="sc-val bd-over" id="sc-over-q3">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Max</span><span class="sc-val bd-max"  id="sc-max-q3">$0</span></div>
+        </div>
+        <div class="summary-cell">
+          <div class="sc-title" style="color:var(--gold);">Q4</div>
+          <div class="sc-row"><span class="sc-label">Base</span><span class="sc-val bd-base" id="sc-base-q4">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Over</span><span class="sc-val bd-over" id="sc-over-q4">$0</span></div>
+          <div class="sc-row"><span class="sc-label">Max</span><span class="sc-val bd-max"  id="sc-max-q4">$0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- YTD Summary card -->
+    <div class="summary-card fade-up delay-4">
+      <div class="summary-card-top" id="summaryTop">
+        <div class="sc-top-label" style="margin-bottom:6px;">Abbott Incentive Machine</div>
+        <div class="sc-top-title">Estimated Annual<br>SPIF Earnings</div>
+        <div class="sc-ytd-label">Year-to-Date Total</div>
+        <div class="sc-ytd-value"><small>$</small><span id="scYTD">0</span></div>
+      </div>
+      <div class="summary-card-body">
+        <div class="q-row">
+          <div class="q-row-left">
+            <div class="q-dot" style="background:var(--abbott-blue)"></div>
+            <span class="q-row-label">Q1 Earnings</span>
+          </div>
+          <span class="q-row-value" id="scQ1">$0</span>
+        </div>
+        <div class="q-row">
+          <div class="q-row-left">
+            <div class="q-dot" style="background:var(--abbott-teal)"></div>
+            <span class="q-row-label">Q2 Earnings</span>
+          </div>
+          <span class="q-row-value" id="scQ2">$0</span>
+        </div>
+        <div class="q-row">
+          <div class="q-row-left">
+            <div class="q-dot" style="background:#5BA4CF"></div>
+            <span class="q-row-label">Q3 Earnings</span>
+          </div>
+          <span class="q-row-value" id="scQ3">$0</span>
+        </div>
+        <div class="q-row">
+          <div class="q-row-left">
+            <div class="q-dot" style="background:var(--gold)"></div>
+            <span class="q-row-label">Q4 Earnings</span>
+          </div>
+          <span class="q-row-value" id="scQ4">$0</span>
+        </div>
+
+        <!-- Combined total row (shows when 2+ combos saved) -->
+        <div class="q-row" id="cumulativeTotalRow" style="display:none;border-top:2px solid var(--abbott-blue);margin-top:4px;padding-top:8px;">
+          <div class="q-row-left">
+            <div class="q-dot" style="background:var(--abbott-blue)"></div>
+            <span class="q-row-label" style="font-weight:700;color:var(--abbott-blue);">All Combos Total</span>
+          </div>
+          <span class="q-row-value" id="cumulativeTotal" style="color:var(--abbott-blue);font-size:16px;">$0</span>
+        </div>
+
+        <!-- Save to cumulative button -->
+        <button onclick="saveCurrentEarningsToCumulative()" style="
+          width:100%;margin-top:12px;
+          background:var(--abbott-blue-lt);color:var(--abbott-blue);
+          border:1.5px solid rgba(0,113,197,0.2);border-radius:var(--radius-sm);
+          font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;
+          padding:7px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;
+        " onmouseover="this.style.background='#D0E8F7'" onmouseout="this.style.background='var(--abbott-blue-lt)'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Save to Cumulative (current filter)
+        </button>
+      </div>
+
+      <!-- Cumulative breakdown section -->
+      <div style="padding:0 16px 16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9AA0A9;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <span>Cumulative by Filter Combo</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span onclick="exportCumulativeToExcel()" style="cursor:pointer;color:#166534;font-size:9px;font-weight:600;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;display:flex;align-items:center;gap:3px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Excel
+            </span>
+            <span onclick="clearAllCumulative()" style="cursor:pointer;color:#C0392B;font-size:9px;font-weight:600;">Clear All</span>
+          </div>
+        </div>
+        <div id="cumulativePanel">
+          <div style="font-size:11px;color:#9AA0A9;">No records yet. Select filters, enter values, then click "Save to Cumulative".</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /bottom-panel -->
+</div><!-- /main -->
+
+<!-- SheetJS for reading and writing Excel files (with style support) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  CONFIGURATION — set your SharePoint Excel file URL here
+//  After uploading ATM - Resp Instrument SPIF.xlsx to SharePoint,
+//  paste the direct download link below (must end with ?download=1 or
+//  be the /download/ variant from SharePoint).
+//
+//  SharePoint direct download format:
+//  https://[tenant].sharepoint.com/sites/[site]/Shared%20Documents/ATM%20-%20Resp%20Instrument%20SPIF.xlsx?download=1
+//
+//  OneDrive personal format:
+//  https://onedrive.live.com/download?resid=XXXX&authkey=YYYY
+// ═══════════════════════════════════════════════════════════════════════
+const EXCEL_URL = '';   // ← PASTE YOUR SHAREPOINT LINK HERE
+
+// ── FALLBACK static table (used when Excel URL is empty or fails) ───────
+// These are the exact values from your Ref sheet — always current as backup
+const STATIC_RATES = {
+  "Sales Rep|New Account|Purchase|ID Now ":    { base: 1000, over: 1200, max: 1600 },
+  "Sales Rep|New Account|Placement|ID Now ":   { base: 800,  over: 1000, max: 1200 },
+  "Sales Rep|New Account|Purchase|Digival":    { base: 600,  over: 800,  max: 1200 },
+  "Sales Rep|New Account|Placement|Digival":   { base: 400,  over: 600,  max: 800  },
+  "Sales Rep|Existing|Purchase|ID Now ":       { base: 250,  over: 350,  max: 450  },
+  "Sales Rep|Existing|Placement|ID Now ":      { base: 200,  over: 300,  max: 400  },
+  "Sales Rep|Existing|Purchase|Digival":       { base: 150,  over: 200,  max: 250  },
+  "Sales Rep|Existing|Placement|Digival":      { base: 100,  over: 150,  max: 200  },
+  "Coaching People Manager|New Account|Purchase|ID Now ":  { base: 500, over: 600, max: 800 },
+  "Coaching People Manager|New Account|Placement|ID Now ": { base: 400, over: 500, max: 600 },
+  "Coaching People Manager|New Account|Purchase|Digival":  { base: 300, over: 400, max: 600 },
+  "Coaching People Manager|New Account|Placement|Digival": { base: 200, over: 300, max: 400 },
+  "_default": { base: 0, over: 0, max: 0 }
+};
+
+// Live rate table — gets overwritten when Excel loads from SharePoint
+let RATE_TABLE = { ...STATIC_RATES };
+let dataSource = 'static'; // 'static' | 'excel' | 'loading'
+
+// ── EXCEL LOADER ─────────────────────────────────────────────────────────
+async function loadExcelFromSharePoint() {
+  if (!EXCEL_URL) {
+    setDataSourceBadge('static');
+    return;
+  }
+
+  setDataSourceBadge('loading');
+
+  try {
+    const res = await fetch(EXCEL_URL, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const buf  = await res.arrayBuffer();
+    const wb   = XLSX.read(buf, { type: 'array' });
+
+    // Find the "Ref" sheet (case-insensitive)
+    const sheetName = wb.SheetNames.find(n => n.toLowerCase() === 'ref');
+    if (!sheetName) throw new Error('Ref sheet not found in workbook');
+
+    const ws   = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    const newTable = {};
+    let loaded = 0;
+
+    rows.forEach(row => {
+      // Column names from your Ref sheet:
+      // Key, Role, Account Type, Business Type, Instrument, <=100%, 100% - 200%, >=200%
+      const role    = String(row['Role']          || '').trim();
+      const account = String(row['Account Type']  || '').trim();
+      const bizType = String(row['Business Type'] || '').trim();
+      const instr   = String(row['Instrument']    || '').trim();
+      const base    = parseFloat(row['<=100%'])    || 0;
+      const over    = parseFloat(row['100% - 200%']) || 0;
+      const max     = parseFloat(row['>=200%'])    || 0;
+
+      if (!role || !account || !bizType || !instr) return;
+
+      // Build key — preserve trailing space on "ID Now " if present in Excel
+      const key = `${role}|${account}|${bizType}|${instr}`;
+      newTable[key] = { base, over, max };
+      loaded++;
+    });
+
+    if (loaded === 0) throw new Error('No valid rows parsed from Ref sheet');
+
+    newTable['_default'] = { base: 0, over: 0, max: 0 };
+    RATE_TABLE = newTable;
+    dataSource = 'excel';
+    setDataSourceBadge('excel', loaded);
+    populateDropdownsFromRates(newTable);
+    applyFilters();
+
+  } catch (err) {
+    console.warn('Excel load failed, using static rates:', err.message);
+    setDataSourceBadge('error', 0, err.message);
+    RATE_TABLE = { ...STATIC_RATES };
+    dataSource = 'static';
+    applyFilters();
+  }
+}
+
+// ── UPDATE DROPDOWNS from loaded data ────────────────────────────────────
+function populateDropdownsFromRates(table) {
+  const roles=new Set(), accounts=new Set(), bizTypes=new Set(), instrs=new Set();
+  Object.keys(table).forEach(k => {
+    if (k === '_default') return;
+    const [r,a,b,i] = k.split('|');
+    if(r) roles.add(r); if(a) accounts.add(a);
+    if(b) bizTypes.add(b); if(i) instrs.add(i.trim());
+  });
+
+  fillSelect('roleSelect',     [...roles]);
+  fillSelect('accountSelect',  [...accounts]);
+  fillSelect('businessSelect', [...bizTypes]);
+  fillSelect('instrumentSelect', [...instrs]);
+}
+
+function fillSelect(id, values) {
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  sel.innerHTML = values.map(v =>
+    `<option value="${v}"${v.trim()===cur.trim()?'selected':''}>${v.trim()}</option>`
+  ).join('');
+}
+
+// ── DATA SOURCE BADGE ────────────────────────────────────────────────────
+function setDataSourceBadge(state, count, errMsg) {
+  let badge = document.getElementById('dsBadge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'dsBadge';
+    badge.style.cssText = `
+      font-family:'IBM Plex Sans',sans-serif; font-size:10px; font-weight:600;
+      padding:4px 10px; border-radius:50px; letter-spacing:0.5px;
+      display:flex; align-items:center; gap:5px; cursor:default;
+    `;
+    document.querySelector('.rate-strip').parentElement.insertBefore(
+      badge, document.querySelector('.rate-strip')
+    );
+  }
+
+  const configs = {
+    loading: { bg:'#EFF6FF', color:'#1D4ED8', border:'#BFDBFE',
+               dot:'#3B82F6', label:'Loading rates…', title:'' },
+    excel:   { bg:'#ECFDF5', color:'#065F46', border:'#A7F3D0',
+               dot:'#10B981', label:`Live · ${count} rates`, title:'Rates loaded from SharePoint Excel' },
+    static:  { bg:'#FEF3C7', color:'#92400E', border:'#FDE68A',
+               dot:'#F59E0B', label:'Static rates', title:'Paste Excel URL in EXCEL_URL to use live data' },
+    error:   { bg:'#FEF2F2', color:'#991B1B', border:'#FECACA',
+               dot:'#EF4444', label:'Excel error · Static fallback', title: errMsg||'' },
+  };
+  const c = configs[state] || configs.static;
+  badge.style.background = c.bg;
+  badge.style.color = c.color;
+  badge.style.border = `1px solid ${c.border}`;
+  badge.title = c.title;
+  badge.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:${c.dot};display:inline-block;${state==='loading'?'animation:spin 1s linear infinite':''}"></span> ${c.label}`;
+}
+
+// ── GET RATES ────────────────────────────────────────────────────────────
+function getRates() {
+  const instr = document.getElementById('instrumentSelect').value;
+  // Try both with and without trailing space (handles Excel trailing spaces)
+  const keyExact = [
+    document.getElementById('roleSelect').value,
+    document.getElementById('accountSelect').value,
+    document.getElementById('businessSelect').value,
+    instr
+  ].join('|');
+  const keyTrim = [
+    document.getElementById('roleSelect').value,
+    document.getElementById('accountSelect').value,
+    document.getElementById('businessSelect').value,
+    instr.trim()
+  ].join('|');
+  const keySpace = keyTrim + ' '; // handle "ID Now " trailing space
+
+  const r = RATE_TABLE[keyExact] || RATE_TABLE[keyTrim] || RATE_TABLE[keySpace];
+  const noMatch = !r;
+  document.getElementById('noMatchMsg').style.display = noMatch ? 'block' : 'none';
+  return r || RATE_TABLE['_default'];
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────
+const S = {
+  q1:{target:null,actual:null}, q2:{target:null,actual:null},
+  q3:{target:null,actual:null}, q4:{target:null,actual:null}
+};
+const E = { q1:{}, q2:{}, q3:{}, q4:{} };
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const fmt  = n => (n==null||isNaN(n)) ? '$0' : '$'+n.toLocaleString('en-US');
+const fmtS = n => !n ? '$0' : n>=1000 ? '$'+(n/1000).toFixed(1)+'K' : '$'+n;
+
+function calcAch100(a,t)  { if(a==null||t==null)return null; return t===0?a:Math.min(a,t); }
+function calcOver(a,t)    {
+  if(a==null||t==null)return null;
+  const r=t===0?Infinity:a/t;
+  if(r>1&&r<=2)return a-t; if(r>2)return t; return 0;
+}
+function calcOver200(a,t) {
+  if(a==null||t==null)return null;
+  return (t===0?Infinity:a/t)>2 ? a-(2*t) : 0;
+}
+
+function badgeInfo(a,t) {
+  if(a==null||t==null) return ['—','ach-none'];
+  if(t===0) return ['N/A','ach-none'];
+  const p=a/t;
+  if(p>=2)   return ['>200%','ach-over'];
+  if(p>=1)   return [(p*100).toFixed(0)+'%','ach-hit'];
+  if(p>=0.5) return [(p*100).toFixed(0)+'%','ach-mid'];
+  return [(p*100).toFixed(0)+'%','ach-low'];
+}
+
+function progInfo(a,t) {
+  if(a==null||t==null||t===0) return {w:'0%',cls:'fill-base'};
+  const r=a/t;
+  const w=Math.min((Math.min(r,3)/3)*100,100)+'%';
+  return {w, cls:r>2?'fill-max':r>1?'fill-over':'fill-base'};
+}
+
+// ── RECALC ───────────────────────────────────────────────────────────────
+function recalc(q) {
+  const tv=document.getElementById('target-'+q).value;
+  const av=document.getElementById('actual-'+q).value;
+  S[q].target=tv===''?null:+tv;
+  S[q].actual=av===''?null:+av;
+  const {target:t,actual:a}=S[q];
+  const rates=getRates();
+
+  const ach  = calcAch100(a,t);
+  const over = calcOver(a,t);
+  const max  = calcOver200(a,t);
+
+  const s100  = ach !=null ? ach *rates.base : 0;
+  const sOver = over!=null ? over*rates.over  : 0;
+  const sMax  = max !=null ? max *rates.max   : 0;
+  const total = s100+sOver+sMax;
+
+  E[q]={s100,sOver,sMax,total,ach,over,max};
+
+  const [btxt,bcls]=badgeInfo(a,t);
+  const b=document.getElementById('achBadge-'+q);
+  b.textContent=btxt; b.className='ach-badge '+bcls;
+
+  const pEl=document.getElementById('pct-'+q);
+  pEl.textContent=(a!=null&&t!=null&&t>0)?(a/t*100).toFixed(1)+'%':'—';
+
+  const {w,cls}=progInfo(a,t);
+  const pg=document.getElementById('prog-'+q);
+  pg.style.width=w; pg.className='progress-fill '+cls;
+
+  document.getElementById('units100-'+q).textContent  = ach !=null?ach+' u' :'—';
+  document.getElementById('unitsOver-'+q).textContent = over!=null?over+' u':'—';
+  document.getElementById('unitsMax-'+q).textContent  = max !=null?max+' u' :'—';
+
+  upd('spiff100-'+q, fmt(s100));
+  upd('spiffOver-'+q,fmt(sOver));
+  upd('spiffMax-'+q, fmt(sMax));
+  upd('qtotal-'+q,   fmt(total));
+
+  document.getElementById('sc-base-'+q).textContent=fmt(s100);
+  document.getElementById('sc-over-'+q).textContent=fmt(sOver);
+  document.getElementById('sc-max-'+q).textContent =fmt(sMax);
+
+  updateYTD();
+  updateChart();
+}
+
+function upd(id,val) {
+  const el=document.getElementById(id);
+  if(el.textContent===val) return;
+  el.textContent=val;
+  el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+}
+
+// ── YTD ──────────────────────────────────────────────────────────────────
+function updateYTD() {
+  const ytd=['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+  document.getElementById('headerYTD').textContent='$'+ytd.toLocaleString('en-US');
+  document.getElementById('scYTD').textContent=ytd.toLocaleString('en-US');
+  ['q1','q2','q3','q4'].forEach((q,i)=>{
+    document.getElementById('scQ'+(i+1)).textContent=fmt(E[q].total||0);
+    document.getElementById('bc-amt-'+q).textContent=fmtS(E[q].total||0);
+  });
+}
+
+// ── BAR CHART ────────────────────────────────────────────────────────────
+function updateChart() {
+  const MAX=100;
+  const totals=['q1','q2','q3','q4'].map(q=>E[q].total||0);
+  const peak=Math.max(...totals,1);
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const e=E[q],tot=e.total||0;
+    const h=Math.max((tot/peak)*MAX,3);
+    const bH=tot>0?(e.s100/tot)*h:h;
+    const oH=tot>0?(e.sOver/tot)*h:0;
+    const mH=tot>0?(e.sMax/tot)*h:0;
+    document.getElementById('bc-stack-'+q).style.height=h+'px';
+    document.getElementById('bc-base-'+q).style.height=bH+'px';
+    document.getElementById('bc-over-'+q).style.height=oH+'px';
+    document.getElementById('bc-max-'+q).style.height=mH+'px';
+  });
+}
+
+// ── BAR TOOLTIPS ─────────────────────────────────────────────────────────
+function showBarTip(event, q) {
+  const e = E[q];
+  const tip = document.getElementById('barTooltip');
+  const qLabel = { q1:'Quarter 1', q2:'Quarter 2', q3:'Quarter 3', q4:'Quarter 4' };
+
+  document.getElementById('btTitle').textContent = qLabel[q];
+  document.getElementById('btBase').textContent  = fmt(e.s100  || 0);
+  document.getElementById('btOver').textContent  = fmt(e.sOver || 0);
+  document.getElementById('btMax').textContent   = fmt(e.sMax  || 0);
+  document.getElementById('btTotal').textContent = fmt(e.total || 0);
+
+  tip.style.display = 'block';
+  positionTip(event, tip);
+}
+
+function hideBarTip() {
+  document.getElementById('barTooltip').style.display = 'none';
+}
+
+document.addEventListener('mousemove', function(ev) {
+  const tip = document.getElementById('barTooltip');
+  if (tip.style.display === 'none') return;
+  positionTip(ev, tip);
+});
+
+function positionTip(ev, tip) {
+  const x = ev.clientX, y = ev.clientY;
+  const tw = tip.offsetWidth  || 180;
+  const th = tip.offsetHeight || 120;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = x + 14, top = y - 20;
+  if (left + tw > vw - 10) left = x - tw - 14;
+  if (top  + th > vh - 10) top  = vh - th - 10;
+  if (top < 6) top = 6;
+  tip.style.left = left + 'px';
+  tip.style.top  = top  + 'px';
+}
+
+// ── FILTER CHANGE ─────────────────────────────────────────────────────────
+function applyFilters() {
+  const r=getRates();
+  document.getElementById('rateBase').textContent='$'+r.base;
+  document.getElementById('rateOver').textContent='$'+r.over;
+  document.getElementById('rateMax').textContent ='$'+r.max;
+  ['q1','q2','q3','q4'].forEach(q=>recalc(q));
+}
+
+// ── MANUAL EXCEL UPLOAD (drag or click) ──────────────────────────────────
+// Allows users to drop the Excel file directly if SharePoint URL isn't set
+function setupFileUpload() {
+  const zone = document.getElementById('uploadZone');
+  if (!zone) return;
+
+  zone.addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.xlsx,.xls';
+    inp.onchange = e => parseLocalFile(e.target.files[0]);
+    inp.click();
+  });
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background='#EFF6FF'; });
+  zone.addEventListener('dragleave',() => { zone.style.background=''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.background='';
+    const file = e.dataTransfer.files[0];
+    if (file) parseLocalFile(file);
+  });
+}
+
+function parseLocalFile(file) {
+  if (!file) return;
+  setDataSourceBadge('loading');
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb   = XLSX.read(ev.target.result, { type: 'array' });
+      const sheetName = wb.SheetNames.find(n => n.toLowerCase() === 'ref');
+      if (!sheetName) throw new Error('No "Ref" sheet found');
+      const ws   = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      const newTable = {};
+      let loaded = 0;
+      rows.forEach(row => {
+        const role    = String(row['Role']          || '').trim();
+        const account = String(row['Account Type']  || '').trim();
+        const bizType = String(row['Business Type'] || '').trim();
+        const instr   = String(row['Instrument']    || '').trim();
+        const base    = parseFloat(row['<=100%'])     || 0;
+        const over    = parseFloat(row['100% - 200%'])|| 0;
+        const max     = parseFloat(row['>=200%'])     || 0;
+        if (!role||!account||!bizType||!instr) return;
+        newTable[`${role}|${account}|${bizType}|${instr}`]   = {base,over,max};
+        newTable[`${role}|${account}|${bizType}|${instr} `]  = {base,over,max};
+        loaded++;
+      });
+      if(loaded===0) throw new Error('No rows parsed');
+      newTable['_default']={base:0,over:0,max:0};
+      RATE_TABLE=newTable;
+      setDataSourceBadge('excel', loaded);
+      populateDropdownsFromRates(newTable);
+      applyFilters();
+
+      // ── Update upload button to show filename + stay visible ──
+      const shortName = file.name.length > 22
+        ? file.name.substring(0,20) + '…'
+        : file.name;
+      const lbl = document.getElementById('uploadZoneLabel');
+      lbl.textContent = '↺ ' + shortName;
+      const zone = document.getElementById('uploadZone');
+      zone.style.background   = '#F0FDF4';
+      zone.style.borderColor  = '#BBF7D0';
+      zone.style.borderStyle  = 'solid';
+      zone.style.color        = '#166534';
+      zone.title = `Loaded: ${file.name} — Click to reload or change file`;
+      zone.onmouseover = () => { zone.style.background='#DCFCE7'; };
+      zone.onmouseout  = () => { zone.style.background='#F0FDF4'; };
+
+    } catch(err) {
+      alert('Could not parse Excel file: '+err.message);
+      setDataSourceBadge('error',0,err.message);
+      // Reset upload button back to default on error
+      document.getElementById('uploadZoneLabel').textContent = 'Load Excel Rates';
+      const zone = document.getElementById('uploadZone');
+      zone.style.background  = '#FEF2F2';
+      zone.style.borderColor = '#FECACA';
+      zone.style.color       = '#991B1B';
+      setTimeout(()=>{
+        zone.style.background  = '#F0F9FF';
+        zone.style.borderColor = '#BAE6FD';
+        zone.style.color       = '#0369A1';
+        document.getElementById('uploadZoneLabel').textContent = 'Load Excel Rates';
+      }, 3000);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── EXPORT TO EXCEL — Exact format matching screenshot ────────────────────
+function exportToExcel() {
+  const rates  = getRates();
+  const role   = document.getElementById('roleSelect').value;
+  const acct   = document.getElementById('accountSelect').value;
+  const biz    = document.getElementById('businessSelect').value;
+  const instr  = document.getElementById('instrumentSelect').value.trim();
+  const now    = new Date();
+  const ytd    = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+
+  // ── Build rows exactly as shown in screenshot ─────────────────────────
+  // Row 1: Title (merged A1:K1)
+  // Row 2: blank
+  // Row 3: Column headers
+  // Rows 4–7: Q1–Q4 data
+  // Row 8: blank
+  // Row 9: YTD Total (J9 label, K9 value — yellow highlighted)
+  // Row 10: blank
+  // Row 11: "On these selection"
+  // Row 12: Role ->  Sales Rep
+  // Row 13: Account Type ->  New Account
+  // Row 14: Business Type ->  Purchase
+  // Row 15: Instrument ->  ID Now
+
+  const headers = [
+    'Quarter', 'Target', 'Actual', 'Achievement %',
+    'Ach @ 100% (units)', 'Over (100–200%) units', 'Over (>200%) units',
+    'SPIF Base ($)', 'SPIF Over ($)', 'SPIF Max ($)', 'Total Earnings ($)'
+  ];
+
+  const dataRows = ['q1','q2','q3','q4'].map((q,i) => {
+    const t = S[q].target; const a = S[q].actual; const e = E[q];
+    const pct = (t!=null && a!=null && t>0) ? (a/t*100).toFixed(1)+'%' : '—';
+    return [
+      'Q'+(i+1),
+      t ?? '',
+      a ?? '',
+      pct,
+      e.ach  ?? 0,
+      e.over ?? 0,
+      e.max  ?? 0,
+      e.s100  || 0,
+      e.sOver || 0,
+      e.sMax  || 0,
+      e.total || 0
+    ];
+  });
+
+  // AOA structure
+  const aoa = [
+    ['Abbott Incentive Machine (ATM) — SPIF Calculator Report','','','','','','','','','',''],  // row 1
+    [],                                                                                          // row 2
+    headers,                                                                                     // row 3
+    ...dataRows,                                                                                 // rows 4-7
+    [],                                                                                          // row 8
+    ['','','','','','','','','','YTD Total', ytd],                                               // row 9
+    [],                                                                                          // row 10
+    ['On these selection','','','','','','','','','',''],                                         // row 11
+    ['Role ->', role],                                                                           // row 12
+    ['Account Type ->', acct],                                                                   // row 13
+    ['Business Type ->', biz],                                                                   // row 14
+    ['Instrument ->', instr],                                                                    // row 15
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // ── Merges ────────────────────────────────────────────────────────────
+  ws['!merges'] = [
+    { s:{r:0,c:0}, e:{r:0,c:10} },   // Title row A1:K1
+    { s:{r:10,c:0}, e:{r:10,c:10} }, // "On these selection" A11:K11
+  ];
+
+  // ── Column widths (matching screenshot proportions) ───────────────────
+  ws['!cols'] = [
+    {wch:12},  // A Quarter
+    {wch:9},   // B Target
+    {wch:9},   // C Actual
+    {wch:14},  // D Achievement %
+    {wch:20},  // E Ach @ 100%
+    {wch:22},  // F Over 100-200%
+    {wch:20},  // G Over >200%
+    {wch:16},  // H SPIF Base
+    {wch:16},  // I SPIF Over
+    {wch:16},  // J SPIF Max
+    {wch:20},  // K Total Earnings
+  ];
+
+  // ── Row heights ───────────────────────────────────────────────────────
+  ws['!rows'] = [
+    {hpt:18},  // row 1 title
+    {hpt:6},   // row 2 blank
+    {hpt:20},  // row 3 headers
+    {hpt:16},{hpt:16},{hpt:16},{hpt:16}, // Q1-Q4
+  ];
+
+  // ── Cell styles using SheetJS style properties ────────────────────────
+  // Title cell A1
+  const titleCell = ws['A1'];
+  if (titleCell) {
+    titleCell.s = {
+      font: { bold: true, sz: 13, color: { rgb: '1A1F2E' } },
+      alignment: { horizontal: 'left', vertical: 'center' },
+      fill: { fgColor: { rgb: 'FFFFFF' } }
+    };
+  }
+
+  // Header row (row index 2 = row 3 in sheet)
+  headers.forEach((h, ci) => {
+    const addr = XLSX.utils.encode_cell({r:2, c:ci});
+    if (!ws[addr]) ws[addr] = {v:h, t:'s'};
+    ws[addr].s = {
+      font:      { bold: true, sz: 10, color: { rgb: 'FFFFFF' } },
+      fill:      { fgColor: { rgb: '0071C5' } },  // Abbott blue
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+      border: {
+        bottom: { style: 'thin', color: { rgb: 'FFFFFF' } },
+        right:  { style: 'thin', color: { rgb: 'FFFFFF' } }
+      }
+    };
+  });
+
+  // Data rows Q1-Q4 (row indices 3-6)
+  for (let ri = 3; ri <= 6; ri++) {
+    for (let ci = 0; ci <= 10; ci++) {
+      const addr = XLSX.utils.encode_cell({r:ri, c:ci});
+      if (!ws[addr]) continue;
+      const isEven = ri % 2 === 1;
+      ws[addr].s = {
+        font: { sz: 10, color: { rgb: '1A1F2E' } },
+        fill: { fgColor: { rgb: isEven ? 'F8F9FA' : 'FFFFFF' } },
+        alignment: { horizontal: ci === 0 ? 'left' : 'center', vertical: 'center' },
+        border: {
+          bottom: { style: 'thin', color: { rgb: 'E5E8EC' } },
+          right:  { style: 'thin', color: { rgb: 'E5E8EC' } }
+        }
+      };
+      // Bold the Quarter label (col A)
+      if (ci === 0) ws[addr].s.font.bold = true;
+      // Bold + blue for Total Earnings (col K)
+      if (ci === 10) {
+        ws[addr].s.font = { bold: true, sz: 10, color: { rgb: '0071C5' } };
+        ws[addr].s.alignment = { horizontal: 'right', vertical: 'center' };
+      }
+    }
+  }
+
+  // YTD Total row (row index 8 = row 9) — yellow highlight like screenshot
+  const ytdLabelAddr = XLSX.utils.encode_cell({r:8, c:9});
+  const ytdValAddr   = XLSX.utils.encode_cell({r:8, c:10});
+  if (ws[ytdLabelAddr]) {
+    ws[ytdLabelAddr].s = {
+      font:      { bold: true, sz: 11, color: { rgb: '1A1F2E' } },
+      fill:      { fgColor: { rgb: 'FFFF00' } },
+      alignment: { horizontal: 'right', vertical: 'center' }
+    };
+  }
+  if (ws[ytdValAddr]) {
+    ws[ytdValAddr].s = {
+      font:      { bold: true, sz: 11, color: { rgb: '1A1F2E' } },
+      fill:      { fgColor: { rgb: 'FFFF00' } },
+      alignment: { horizontal: 'right', vertical: 'center' }
+    };
+  }
+
+  // "On these selection" row (row index 10)
+  const onSelAddr = XLSX.utils.encode_cell({r:10, c:0});
+  if (ws[onSelAddr]) {
+    ws[onSelAddr].s = {
+      font: { bold: true, sz: 10, color: { rgb: '0071C5' } },
+      fill: { fgColor: { rgb: 'E8F3FB' } }
+    };
+  }
+
+  // Selection label rows (12-15, indices 11-14) — light beige like screenshot
+  const selLabels  = ['Role ->', 'Account Type ->', 'Business Type ->', 'Instrument ->'];
+  const selValues  = [role, acct, biz, instr];
+  for (let ri = 11; ri <= 14; ri++) {
+    const lAddr = XLSX.utils.encode_cell({r:ri, c:0});
+    const vAddr = XLSX.utils.encode_cell({r:ri, c:1});
+    if (ws[lAddr]) ws[lAddr].s = {
+      font: { sz:10, color:{rgb:'6B717A'} },
+      fill: { fgColor: { rgb: 'F5F0E8' } },  // beige like screenshot
+      alignment: { horizontal: 'left' }
+    };
+    if (ws[vAddr]) ws[vAddr].s = {
+      font: { bold:true, sz:10, color:{rgb:'1A1F2E'} },
+      fill: { fgColor: { rgb: 'F5F0E8' } },
+      alignment: { horizontal: 'left' }
+    };
+  }
+
+  // ── Write workbook ────────────────────────────────────────────────────
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'SPIF Results');
+
+  const fn = `ATM_SPIF_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.xlsx`;
+  XLSX.writeFile(wb, fn);
+
+  // Button feedback
+  const btn = document.getElementById('exportBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Exported!`;
+  btn.style.background = 'rgba(255,255,255,0.35)';
+  setTimeout(() => { btn.innerHTML = orig; btn.style.background = 'rgba(255,255,255,0.18)'; }, 2200);
+}
+
+// ── SPIN ANIMATION ────────────────────────────────────────────────────────
+const style=document.createElement('style');
+style.textContent=`@keyframes spin{to{transform:rotate(360deg)}}`;
+document.head.appendChild(style);
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+setDataSourceBadge('static');
+applyFilters();
+setupFileUpload();
+if (EXCEL_URL) loadExcelFromSharePoint();
+refreshSavedReportsCount();
+loadCommentsForCurrentRep();
+
+['q1','q2','q3','q4'].forEach((q,i)=>{
+  document.getElementById('target-'+q).value=[4,5,5,3][i];
+  document.getElementById('actual-'+q).value=[10,8,6,4][i];
+  recalc(q);
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// ── LOCALSTORAGE — SAVE / LOAD REPORTS ────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+const LS_KEY = 'atm_spif_reports';
+
+function getStoredReports() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveReport() {
+  const name = document.getElementById('repName').value.trim();
+  if (!name) { showToast('⚠ Please enter your name first'); return; }
+
+  const role    = document.getElementById('roleSelect').value;
+  const acct    = document.getElementById('accountSelect').value;
+  const biz     = document.getElementById('businessSelect').value;
+  const instr   = document.getElementById('instrumentSelect').value.trim();
+  const ytd     = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+  const now     = new Date();
+
+  const report = {
+    id:        Date.now(),
+    name,
+    role,
+    acct,
+    biz,
+    instr,
+    savedAt:   now.toISOString(),
+    filters:   { role, acct, biz, instr },
+    quarters: {
+      q1: { target:S.q1.target, actual:S.q1.actual, ...E.q1 },
+      q2: { target:S.q2.target, actual:S.q2.actual, ...E.q2 },
+      q3: { target:S.q3.target, actual:S.q3.actual, ...E.q3 },
+      q4: { target:S.q4.target, actual:S.q4.actual, ...E.q4 },
+    },
+    ytd,
+    comments: { q1:'', q2:'', q3:'', q4:'' }  // manager fills these
+  };
+
+  // Check if same name already saved — update instead of duplicate
+  const reports = getStoredReports();
+  const idx = reports.findIndex(r => r.name.toLowerCase() === name.toLowerCase());
+  if (idx >= 0) {
+    report.comments = reports[idx].comments; // preserve existing comments
+    reports[idx] = report;
+    showToast('✅ Report updated for ' + name);
+  } else {
+    reports.push(report);
+    showToast('✅ Report saved for ' + name);
+  }
+
+  localStorage.setItem(LS_KEY, JSON.stringify(reports));
+  refreshSavedReportsCount();
+}
+
+function loadReport(id) {
+  const reports = getStoredReports();
+  const r = reports.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('repName').value = r.name;
+
+  // Restore filters
+  setSelectVal('roleSelect',     r.filters.role);
+  setSelectVal('accountSelect',  r.filters.acct);
+  setSelectVal('businessSelect', r.filters.biz);
+  setSelectVal('instrumentSelect', r.filters.instr);
+
+  // Restore inputs
+  ['q1','q2','q3','q4'].forEach(q => {
+    const qd = r.quarters[q];
+    document.getElementById('target-'+q).value = qd.target ?? '';
+    document.getElementById('actual-'+q).value = qd.actual ?? '';
+    recalc(q);
+  });
+
+  applyFilters();
+  loadCommentsForReport(r);
+  closeSavedPanel();
+  showToast('📂 Loaded: ' + r.name);
+}
+
+function deleteReport(id, e) {
+  e.stopPropagation();
+  const reports = getStoredReports().filter(r => r.id !== id);
+  localStorage.setItem(LS_KEY, JSON.stringify(reports));
+  refreshSavedReportsCount();
+  renderSavedPanel();
+  showToast('🗑 Report deleted');
+}
+
+function setSelectVal(id, val) {
+  const el = document.getElementById(id);
+  for (let o of el.options) {
+    if (o.value.trim() === val.trim() || o.value === val) { el.value = o.value; break; }
+  }
+}
+
+function refreshSavedReportsCount() {
+  const n = getStoredReports().length;
+  const badge = document.getElementById('reportsCount');
+  badge.textContent = n;
+  badge.style.display = n > 0 ? 'flex' : 'none';
+}
+
+// ── SAVED PANEL UI ────────────────────────────────────────────────────────
+function openSavedPanel() {
+  renderSavedPanel();
+  document.getElementById('savedPanel').classList.add('open');
+  document.getElementById('savedOverlay').style.display = 'block';
+}
+
+function closeSavedPanel() {
+  document.getElementById('savedPanel').classList.remove('open');
+  document.getElementById('savedOverlay').style.display = 'none';
+}
+
+function renderSavedPanel() {
+  const reports = getStoredReports();
+  const body = document.getElementById('savedPanelBody');
+
+  if (reports.length === 0) {
+    body.innerHTML = '<div class="saved-empty">No saved reports yet.<br>Enter your name and click Save Report.</div>';
+    return;
+  }
+
+  body.innerHTML = reports.slice().reverse().map(r => {
+    const d = new Date(r.savedAt);
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const timeStr = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const hasComments = Object.values(r.comments||{}).some(c=>c.trim());
+    return `
+    <div class="saved-report-card">
+      <div class="src-name">${escHtml(r.name)}
+        ${hasComments ? '<span style="font-size:10px;background:#E8F3FB;color:#0071C5;border-radius:50px;padding:1px 7px;margin-left:6px;font-weight:600;">💬 Has comments</span>' : ''}
+      </div>
+      <div class="src-meta">${escHtml(r.role)} · ${escHtml(r.acct)} · ${escHtml(r.biz)} · ${escHtml(r.instr)}</div>
+      <div class="src-meta">${dateStr} ${timeStr}</div>
+      <div class="src-ytd">$${(r.ytd||0).toLocaleString('en-US')}</div>
+      <div class="src-actions">
+        <button class="src-load-btn" onclick="loadReport(${r.id})">Load Report</button>
+        <button class="src-del-btn" onclick="deleteReport(${r.id}, event)">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── MANAGER COMMENTS — multi-comment support ──────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+function toggleComment(q) {
+  const panel  = document.getElementById('commentPanel-'+q);
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) renderCommentDisplay(q);
+}
+
+function getCommentKey(q) {
+  const repName = document.getElementById('repName').value.trim() || '__default__';
+  return `atm_comments_${repName}_${q}`; // note: _comments_ (plural) for new array format
+}
+
+function getComments(q) {
+  try {
+    const raw = localStorage.getItem(getCommentKey(q));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    // Handle old single-comment format migration
+    if (!Array.isArray(parsed)) {
+      return [{ id:1, text:parsed.text||'', author:parsed.author||'Manager', date:parsed.date||'', edited:false }];
+    }
+    return parsed;
+  } catch(e) { return []; }
+}
+
+function saveComments(q, arr) {
+  localStorage.setItem(getCommentKey(q), JSON.stringify(arr));
+}
+
+function renderCommentDisplay(q) {
+  const comments = getComments(q);
+  const display  = document.getElementById('commentDisplay-'+q);
+  const inputWrap= document.getElementById('commentInputWrap-'+q);
+  const badge    = document.getElementById('commentBadge-'+q);
+  const label    = document.getElementById('commentToggleLabel-'+q);
+  const isManager= window._currentRole === 'manager';
+
+  // Render existing comments
+  if (comments.length > 0) {
+    display.style.display = 'block';
+    display.innerHTML = comments.map((c,i) => `
+      <div style="background:#F8F9FA;border:1px solid #E5E8EC;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+        <div class="comment-meta" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>💬 <b style="color:var(--abbott-blue)">${escHtml(c.author)}</b> · ${escHtml(c.date)}${c.edited?' <span style="color:#9AA0A9;font-size:9px;">(edited)</span>':''}</span>
+          ${isManager ? `<span style="display:flex;gap:6px;">
+            <span onclick="editCommentById('${q}',${c.id})" style="cursor:pointer;color:var(--abbott-blue);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:#E8F3FB;">✏ Edit</span>
+            <span onclick="deleteCommentById('${q}',${c.id})" style="cursor:pointer;color:var(--danger);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:#FDECEB;">✕</span>
+          </span>` : ''}
+        </div>
+        <div class="comment-text" style="margin-top:5px;font-size:13px;color:#3D4350;line-height:1.5;" id="commentText-${q}-${c.id}">${escHtml(c.text)}</div>
+      </div>`).join('');
+    badge.style.display = 'flex';
+    badge.textContent = comments.length;
+    label.textContent = `Manager Comment (${comments.length})`;
+  } else {
+    display.style.display = 'none';
+    badge.style.display = 'none';
+    label.textContent = 'Manager Comment';
+  }
+
+  // Input section — manager always sees "Add new comment" field
+  if (isManager) {
+    inputWrap.style.display = 'block';
+    const ta = inputWrap.querySelector('textarea');
+    ta.dataset.editId = ''; // clear edit mode
+    ta.value = '';
+    ta.readOnly = false;
+    ta.style.background = '';
+    ta.style.color = '';
+    ta.placeholder = comments.length > 0 ? 'Add another comment…' : 'Write your comment…';
+    inputWrap.querySelector('.comment-save-btn').textContent = 'Save Comment';
+    inputWrap.querySelectorAll('button').forEach(b => b.style.display='');
+  } else {
+    // Rep sees read-only note only if no comments exist
+    if (comments.length === 0) {
+      inputWrap.style.display = 'block';
+      const ta = inputWrap.querySelector('textarea');
+      ta.value = ''; ta.placeholder = 'No manager comment yet.';
+      ta.readOnly = true; ta.style.background = '#F8F9FA'; ta.style.color = '#9AA0A9';
+      inputWrap.querySelectorAll('button').forEach(b => b.style.display='none');
+    } else {
+      inputWrap.style.display = 'none'; // rep: comments shown above, no input needed
+    }
+  }
+
+  // Also refresh badge counts on all toggles
+  refreshAllCommentBadges();
+}
+
+function refreshAllCommentBadges() {
+  ['q1','q2','q3','q4'].forEach(q => {
+    const comments = getComments(q);
+    const badge = document.getElementById('commentBadge-'+q);
+    const label = document.getElementById('commentToggleLabel-'+q);
+    if (comments.length > 0) {
+      badge.style.display='flex'; badge.textContent=comments.length;
+      label.textContent=`Manager Comment (${comments.length})`;
+    } else {
+      badge.style.display='none';
+      label.textContent='Manager Comment';
+    }
+  });
+}
+
+function saveComment(q) {
+  const inputWrap = document.getElementById('commentInputWrap-'+q);
+  const ta = inputWrap.querySelector('textarea');
+  const text = ta.value.trim();
+  if (!text) { showToast('⚠ Please write a comment'); return; }
+
+  const managerName = document.getElementById('repName').value.trim() || 'Manager';
+  const editId = parseInt(ta.dataset.editId || '0');
+  const comments = getComments(q);
+
+  if (editId) {
+    // Edit existing
+    const idx = comments.findIndex(c => c.id === editId);
+    if (idx >= 0) {
+      comments[idx].text   = text;
+      comments[idx].edited = true;
+      comments[idx].date   = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+    showToast('✅ Comment updated');
+  } else {
+    // Add new
+    const newId = comments.length > 0 ? Math.max(...comments.map(c=>c.id)) + 1 : 1;
+    comments.push({
+      id:     newId,
+      text,
+      author: managerName,
+      date:   new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+      edited: false
+    });
+    showToast('✅ Comment saved');
+  }
+
+  saveComments(q, comments);
+  ta.dataset.editId = '';
+  ta.value = '';
+  renderCommentDisplay(q);
+  updateCommentInReport(document.getElementById('repName').value.trim()||'__default__', q, comments.map(c=>c.text).join(' | '));
+}
+
+function editCommentById(q, id) {
+  const comments = getComments(q);
+  const c = comments.find(x => x.id === id);
+  if (!c) return;
+  const inputWrap = document.getElementById('commentInputWrap-'+q);
+  const ta = inputWrap.querySelector('textarea');
+  inputWrap.style.display = 'block';
+  ta.value = c.text;
+  ta.dataset.editId = id;
+  ta.readOnly = false; ta.style.background=''; ta.style.color='';
+  inputWrap.querySelector('.comment-save-btn').textContent = 'Update Comment';
+  ta.focus();
+  showToast(`✏ Editing comment #${id}`);
+}
+
+function deleteCommentById(q, id) {
+  const comments = getComments(q).filter(c => c.id !== id);
+  saveComments(q, comments);
+  renderCommentDisplay(q);
+  showToast('🗑 Comment deleted');
+}
+
+function clearComment(q) {
+  const ta = document.getElementById('commentInput-'+q);
+  ta.value = '';
+  ta.dataset.editId = '';
+  const inputWrap = document.getElementById('commentInputWrap-'+q);
+  inputWrap.querySelector('.comment-save-btn').textContent = 'Save Comment';
+}
+
+function updateCommentInReport(repName, q, text) {
+  const reports = getStoredReports();
+  const idx = reports.findIndex(r => r.name.toLowerCase() === repName.toLowerCase());
+  if (idx >= 0) {
+    if (!reports[idx].comments) reports[idx].comments = {};
+    reports[idx].comments[q] = text;
+    localStorage.setItem(LS_KEY, JSON.stringify(reports));
+  }
+}
+
+function loadCommentsForCurrentRep() {
+  refreshAllCommentBadges();
+  // Re-render any open panels
+  ['q1','q2','q3','q4'].forEach(q => {
+    const panel = document.getElementById('commentPanel-'+q);
+    if (panel && panel.style.display !== 'none') renderCommentDisplay(q);
+  });
+}
+
+function loadCommentsForReport(r) {
+  // Comments stored per repName key — already in localStorage
+  loadCommentsForCurrentRep();
+}
+
+// Watch repName changes to re-render comment badges
+document.getElementById('repName').addEventListener('blur', loadCommentsForCurrentRep);
+
+// ══════════════════════════════════════════════════════════════════════
+// ── EMAIL ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+function buildEmailBody() {
+  const name  = document.getElementById('repName').value.trim() || 'Rep';
+  const role  = document.getElementById('roleSelect').value;
+  const acct  = document.getElementById('accountSelect').value;
+  const biz   = document.getElementById('businessSelect').value;
+  const instr = document.getElementById('instrumentSelect').value.trim();
+  const ytd   = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+  const rates = getRates();
+  const lines = [
+    `Abbott Incentive Machine (ATM) — SPIF Report`,
+    `Generated: ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`,
+    ``,
+    `Rep Name: ${name}`,
+    `Role: ${role} | Account: ${acct} | Business: ${biz} | Instrument: ${instr}`,
+    `Rates — Base: $${rates.base} | Over 100-200%: $${rates.over} | Over 200%: $${rates.max}`,
+    ``,
+    `Quarter | Target | Actual | Ach% | Base ($) | Over ($) | Max ($) | Total ($)`,
+    `--------+--------+--------+------+----------+----------+---------+---------`,
+    ...['q1','q2','q3','q4'].map((q,i)=>{
+      const t=S[q].target; const a=S[q].actual; const e=E[q];
+      const pct=(t&&a&&t>0)?(a/t*100).toFixed(1)+'%':'—';
+      return `Q${i+1}      | ${t??'—'}      | ${a??'—'}      | ${pct}  | $${e.s100||0} | $${e.sOver||0} | $${e.sMax||0} | $${e.total||0}`;
+    }),
+    ``,
+    `YTD Total: $${ytd.toLocaleString('en-US')}`,
+  ];
+
+  // Add comments if any
+  const commentLines = ['q1','q2','q3','q4'].map((q,i) => {
+    const key = `atm_comment_${name}_${q}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const obj = JSON.parse(stored);
+      return `Q${i+1} Manager Comment (${obj.author}): ${obj.text}`;
+    }
+    return null;
+  }).filter(Boolean);
+
+  if (commentLines.length) {
+    lines.push('', '--- Manager Comments ---', ...commentLines);
+  }
+
+  return lines.join('\n');
+}
+
+function openEmailModal() {
+  const name = document.getElementById('repName').value.trim() || 'Rep';
+  document.getElementById('emailSubject').value = `SPIF Report — ${name} — ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
+  document.getElementById('emailPreview').textContent = buildEmailBody();
+  document.getElementById('emailModal').classList.add('open');
+  setTimeout(()=>document.getElementById('emailTo').focus(), 120);
+}
+
+function closeEmailModal() {
+  document.getElementById('emailModal').classList.remove('open');
+}
+
+function sendViaOutlook() {
+  const to      = document.getElementById('emailTo').value.trim();
+  const cc      = document.getElementById('emailCc').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body    = buildEmailBody();
+  if (!to) { showToast('⚠ Please enter a recipient email'); document.getElementById('emailTo').focus(); return; }
+  let mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) mailto += `&cc=${encodeURIComponent(cc)}`;
+  window.location.href = mailto;
+}
+
+// ── PDF — Pure JS data-driven PDF (no CDN, no DOM capture, always works) ──
+async function downloadPdfOnly() {
+  showToast('⏳ Building PDF…', 5000);
+  await new Promise(r => setTimeout(r, 100));
+
+  try {
+    const name  = document.getElementById('repName').value.trim() || 'Rep';
+    const role  = document.getElementById('roleSelect').value;
+    const acct  = document.getElementById('accountSelect').value;
+    const biz   = document.getElementById('businessSelect').value;
+    const instr = document.getElementById('instrumentSelect').value.trim();
+    const rates = getRates();
+    const ytd   = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+    const today = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+    // ── Build PDF manually using jsPDF-like raw PDF syntax (no lib needed) ──
+    // We'll use the browser's built-in Blob + data URI approach
+    // Structure: full text report formatted as a clean PDF via SVG→Canvas→Blob
+
+    // Actually use the simplest reliable approach: build an HTML string, open in new tab, auto-print
+    const cumData   = getCumulativeData();
+    const cumCombos = Object.keys(cumData);
+    const grandTotal = cumCombos.reduce((s,k)=>s+(cumData[k].total||0),0);
+
+    // Color helper
+    const blue = '#0071C5';
+    const teal = '#00A3AD';
+
+    // Build styled HTML for printing
+    const qRows = ['q1','q2','q3','q4'].map((q,i) => {
+      const t = S[q].target; const a = S[q].actual; const e = E[q];
+      const pct = (t!=null&&a!=null&&t>0)?(a/t*100).toFixed(1)+'%':'—';
+      return `<tr style="background:${i%2===0?'#F8F9FA':'#fff'}">
+        <td style="font-weight:700;color:#1A1F2E;">Q${i+1}</td>
+        <td style="text-align:center;">${t??'—'}</td>
+        <td style="text-align:center;">${a??'—'}</td>
+        <td style="text-align:center;font-weight:600;">${pct}</td>
+        <td style="text-align:right;color:${blue};">${fmt(e.s100||0)}</td>
+        <td style="text-align:right;color:#D97706;">${fmt(e.sOver||0)}</td>
+        <td style="text-align:right;color:#C0392B;">${fmt(e.sMax||0)}</td>
+        <td style="text-align:right;font-weight:700;color:${blue};">${fmt(e.total||0)}</td>
+      </tr>`;
+    }).join('');
+
+    const cumRows = cumCombos.map(combo => {
+      const d = cumData[combo];
+      return `<tr>
+        <td style="font-weight:600;">${combo}</td>
+        <td style="text-align:center;">${fmt(d.q1)}</td>
+        <td style="text-align:center;">${fmt(d.q2)}</td>
+        <td style="text-align:center;">${fmt(d.q3)}</td>
+        <td style="text-align:center;">${fmt(d.q4)}</td>
+        <td style="text-align:right;font-weight:700;color:${blue};">${fmt(d.total)}</td>
+      </tr>`;
+    }).join('');
+
+    // Manager comments
+    const commentSections = ['q1','q2','q3','q4'].map((q,i) => {
+      const comments = getComments(q);
+      if (!comments.length) return '';
+      return `<div style="margin-bottom:8px;">
+        <b style="color:${blue};">Q${i+1} Comments:</b>
+        ${comments.map(c=>`<div style="margin:4px 0 0 12px;font-size:11px;color:#3D4350;">"${c.text}" — ${c.author}, ${c.date}</div>`).join('')}
+      </div>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>SPIF Report — ${name}</title>
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family:'Segoe UI',Arial,sans-serif; color:#1A1F2E; background:#fff; padding:0; }
+      .header { background:${blue}; color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+      .header h1 { font-size:18px; font-weight:700; }
+      .header .sub { font-size:11px; opacity:0.8; margin-top:2px; }
+      .header .ytd { text-align:right; }
+      .header .ytd-label { font-size:10px; opacity:0.75; text-transform:uppercase; letter-spacing:1px; }
+      .header .ytd-val { font-size:28px; font-weight:700; }
+      .section { padding:16px 24px; }
+      .section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#9AA0A9; margin-bottom:10px; }
+      .meta-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+      .meta-cell { background:#F8F9FA; border-radius:6px; padding:10px 12px; }
+      .meta-label { font-size:9px; color:#9AA0A9; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
+      .meta-val { font-size:13px; font-weight:600; color:#1A1F2E; }
+      table { width:100%; border-collapse:collapse; font-size:12px; }
+      th { background:${blue}; color:#fff; padding:8px 10px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; }
+      td { padding:8px 10px; border-bottom:1px solid #F1F3F5; font-size:12px; }
+      .total-row td { font-weight:700; background:#E8F3FB; color:${blue}; font-size:13px; border-top:2px solid ${blue}; }
+      .rate-strip { background:#F0FDF4; border:1px solid #BBF7D0; border-radius:6px; padding:8px 14px; margin-bottom:16px; font-size:11px; color:#065F46; display:flex; gap:20px; }
+      @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+    </style>
+    </head><body>
+    <div class="header">
+      <div>
+        <div class="header h1" style="font-size:18px;font-weight:700;">Abbott ATM · SPIF Report</div>
+        <div class="sub">${today} · ${name} · ${role}</div>
+      </div>
+      <div class="ytd">
+        <div class="ytd-label">YTD Earnings</div>
+        <div class="ytd-val">${fmt(ytd)}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Report Context</div>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="meta-label">Account Type</div><div class="meta-val">${acct}</div></div>
+        <div class="meta-cell"><div class="meta-label">Business Type</div><div class="meta-val">${biz}</div></div>
+        <div class="meta-cell"><div class="meta-label">Instrument</div><div class="meta-val">${instr}</div></div>
+        <div class="meta-cell"><div class="meta-label">Role</div><div class="meta-val">${role}</div></div>
+      </div>
+      <div class="rate-strip">
+        <span>≤100% Rate: <b>$${rates.base}</b></span>
+        <span>100–200% Rate: <b>$${rates.over}</b></span>
+        <span>&gt;200% Rate: <b>$${rates.max}</b></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Quarterly Breakdown</div>
+      <table>
+        <tr>
+          <th>Quarter</th><th>Target</th><th>Actual</th><th>Ach %</th>
+          <th style="text-align:right">Base ($)</th><th style="text-align:right">Over ($)</th>
+          <th style="text-align:right">Max ($)</th><th style="text-align:right">Total ($)</th>
+        </tr>
+        ${qRows}
+        <tr class="total-row">
+          <td colspan="4">YTD Total</td>
+          <td style="text-align:right">${fmt(['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].s100||0),0))}</td>
+          <td style="text-align:right">${fmt(['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].sOver||0),0))}</td>
+          <td style="text-align:right">${fmt(['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].sMax||0),0))}</td>
+          <td style="text-align:right">${fmt(ytd)}</td>
+        </tr>
+      </table>
+    </div>
+
+    ${cumCombos.length > 0 ? `<div class="section">
+      <div class="section-title">Cumulative Earnings — All Filter Combos</div>
+      <table>
+        <tr><th>Combination</th><th style="text-align:center">Q1</th><th style="text-align:center">Q2</th><th style="text-align:center">Q3</th><th style="text-align:center">Q4</th><th style="text-align:right">Total</th></tr>
+        ${cumRows}
+        <tr class="total-row"><td colspan="5">Grand Total</td><td style="text-align:right">${fmt(grandTotal)}</td></tr>
+      </table>
+    </div>` : ''}
+
+    ${commentSections ? `<div class="section">
+      <div class="section-title">Manager Comments</div>
+      ${commentSections || '<div style="font-size:12px;color:#9AA0A9;">No comments.</div>'}
+    </div>` : ''}
+
+    </body></html>`;
+
+    // Open in new tab and auto-print
+    const blob = new Blob([html], {type:'text/html'});
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (win) {
+      win.onload = () => {
+        setTimeout(() => { win.print(); }, 500);
+      };
+      showToast('✅ PDF opened — press Ctrl+P or use File → Print → Save as PDF', 5000);
+    } else {
+      // Popup blocked — fallback to download link
+      const a = document.createElement('a');
+      a.href = url; a.download = `SPIF_Report_${name.replace(/\s+/g,'_')}.html`;
+      a.click();
+      showToast('📄 Report downloaded as HTML — open and print to PDF', 5000);
+    }
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
+
+  } catch(err) {
+    showToast('❌ PDF error: '+err.message); console.error(err);
+  }
+}
+
+async function sendWithPdfAndOutlook() {
+  const to = document.getElementById('emailTo').value.trim();
+  if (!to) { showToast('⚠ Please enter recipient email'); document.getElementById('emailTo').focus(); return; }
+  await downloadPdfOnly();
+  await new Promise(r => setTimeout(r, 1000));
+  const cc      = document.getElementById('emailCc').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body    = `Please find the SPIF Report attached.\n\n` + buildEmailBody();
+  let mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (cc) mailto += `&cc=${encodeURIComponent(cc)}`;
+  window.location.href = mailto;
+  closeEmailModal();
+}
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg, duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ROLE SELECTION POPUP
+═══════════════════════════════════════════════════════════════════ -->
+<div id="rolePopup" style="
+  position:fixed;inset:0;z-index:900;
+  background:rgba(26,31,46,0.65);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+">
+  <div style="
+    background:#fff;border-radius:16px;padding:36px 40px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.18);
+    width:420px;max-width:92vw;text-align:center;
+    animation:fadeUp 0.3s ease;
+  ">
+    <!-- Abbott logo -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;">
+      <div style="width:4px;height:32px;background:linear-gradient(180deg,#0071C5,#00A3AD);border-radius:2px;"></div>
+      <span style="font-family:'Playfair Display',serif;font-size:24px;color:#0071C5;font-weight:600;">Abbott</span>
+    </div>
+
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:#1A1F2E;margin-bottom:4px;">ATM · SPIF Calculator</div>
+    <div style="font-size:13px;color:#6B717A;margin-bottom:22px;">Select your role to continue</div>
+
+    <!-- Role cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div id="roleCard-rep" onclick="selectRole('rep')" style="
+        border:2px solid #E5E8EC;border-radius:12px;padding:18px 14px;
+        cursor:pointer;transition:all 0.15s;text-align:center;
+      ">
+        <div style="font-size:26px;margin-bottom:6px;">👤</div>
+        <div style="font-weight:700;font-size:13px;color:#1A1F2E;">Sales Rep</div>
+        <div style="font-size:10px;color:#9AA0A9;margin-top:3px;">Enter &amp; track SPIF</div>
+      </div>
+      <div id="roleCard-manager" onclick="selectRole('manager')" style="
+        border:2px solid #E5E8EC;border-radius:12px;padding:18px 14px;
+        cursor:pointer;transition:all 0.15s;text-align:center;
+      ">
+        <div style="font-size:26px;margin-bottom:6px;">👔</div>
+        <div style="font-weight:700;font-size:13px;color:#1A1F2E;">Manager</div>
+        <div style="font-size:10px;color:#9AA0A9;margin-top:3px;">View rep reports</div>
+      </div>
+    </div>
+
+    <!-- Name input -->
+    <div style="text-align:left;margin-bottom:16px;">
+      <label style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#9AA0A9;display:block;margin-bottom:5px;">Your Name <span style="color:#C0392B">*</span></label>
+      <input id="popupName" type="text" placeholder="e.g. Arslan" autocomplete="off" style="
+        width:100%;border:1.5px solid #E5E8EC;border-radius:8px;
+        padding:10px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;
+        color:#1A1F2E;transition:all 0.15s;outline:none;
+      " onfocus="this.style.borderColor='#0071C5';this.style.boxShadow='0 0 0 3px rgba(0,113,197,0.10)'"
+         onblur="this.style.borderColor='#E5E8EC';this.style.boxShadow='none'"
+         oninput="updatePopupBtn()"
+         onkeydown="if(event.key==='Enter' && !document.getElementById('popupConfirmBtn').disabled) confirmRoleWithName()">
+    </div>
+
+    <button id="popupConfirmBtn" onclick="confirmRoleWithName()" disabled style="
+      width:100%;background:#0071C5;color:#fff;border:none;
+      padding:12px;border-radius:8px;font-family:'IBM Plex Sans',sans-serif;
+      font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;
+      opacity:0.4;
+    ">Continue →</button>
+
+    <div id="popupRoleChosen" style="display:none;margin-top:10px;font-size:12px;color:#0071C5;font-weight:600;"></div>
+  </div>
+</div>
+
+<!-- ── SAVED REPORTS SLIDE PANEL ── -->
+<div class="saved-panel" id="savedPanel">
+  <div class="saved-panel-header">
+    <div class="saved-panel-title">Saved Reports</div>
+    <button class="saved-panel-close" onclick="closeSavedPanel()">✕</button>
+  </div>
+  <div class="saved-panel-body" id="savedPanelBody">
+    <div class="saved-empty">No saved reports yet.</div>
+  </div>
+</div>
+<div id="savedOverlay" style="display:none;position:fixed;inset:0;z-index:499;" onclick="closeSavedPanel()"></div>
+
+<!-- ── EMAIL MODAL ── -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-box" style="width:520px;max-width:95vw;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="modal-title">Send Report by Email</div>
+      <button onclick="closeEmailModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1;padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Gmail status bar -->
+    <div id="gmailStatusBar" style="
+      border-radius:8px;padding:9px 14px;margin-bottom:14px;
+      display:flex;align-items:center;gap:10px;font-size:12px;
+    "></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;">
+      <div class="modal-field">
+        <label>From <span style="color:var(--gray-400);font-weight:400;text-transform:none;">(your Gmail)</span></label>
+        <input type="email" class="modal-input" id="emailFrom" placeholder="you@gmail.com" readonly style="background:#F8F9FA;color:#6B717A;">
+      </div>
+      <div class="modal-field">
+        <label>To <span style="color:var(--danger)">*</span></label>
+        <input type="email" class="modal-input" id="emailTo" placeholder="manager@abbott.com">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="modal-field">
+        <label>CC <span style="color:var(--gray-400);font-weight:400;text-transform:none;">(optional)</span></label>
+        <input type="email" class="modal-input" id="emailCc" placeholder="cc@gmail.com">
+      </div>
+      <div class="modal-field">
+        <label>Subject</label>
+        <input type="text" class="modal-input" id="emailSubject" placeholder="SPIF Report">
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label>Message Body <span style="font-size:10px;color:var(--gray-400);font-weight:400;text-transform:none;letter-spacing:0;">(report data auto-appended)</span></label>
+      <textarea class="modal-input" id="emailBody" rows="3" placeholder="Hi Manager, please find my SPIF report below…" style="resize:vertical;font-size:12px;line-height:1.6;"></textarea>
+    </div>
+
+    <!-- PDF attachment option -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <input type="checkbox" id="attachPdf" style="width:14px;height:14px;accent-color:var(--abbott-blue);" checked>
+      <label for="attachPdf" style="font-size:12px;color:var(--gray-600);cursor:pointer;">Generate &amp; download PDF report (attach manually after Outlook opens)</label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeEmailModal()">Cancel</button>
+      <button onclick="connectGmail()" id="gmailConnectBtn" style="
+        display:flex;align-items:center;gap:7px;
+        background:#fff;color:#3D4350;border:1.5px solid #E5E8EC;
+        border-radius:var(--radius-sm);padding:8px 14px;
+        font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;
+      ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Connect Gmail
+      </button>
+      <button class="modal-send" onclick="sendEmailAction()" style="background:var(--abbott-blue);gap:7px;padding:9px 18px;font-size:12px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Report
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// ── ROLE POPUP ────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+let _chosenRole = null;  // 'rep' | 'manager'
+let _managerRepMap = {}; // { 'Manager Name': ['Rep1','Rep2'] }
+
+function selectRole(role) {
+  _chosenRole = role;
+  window._currentRole = role;
+
+  // Visual feedback on cards using new IDs
+  ['rep','manager'].forEach(r => {
+    const card = document.getElementById('roleCard-'+r);
+    if (!card) return;
+    if (r === role) {
+      card.style.borderColor = role==='manager' ? '#00A3AD' : '#0071C5';
+      card.style.background  = role==='manager' ? '#E0F5F6' : '#E8F3FB';
+    } else {
+      card.style.borderColor = '#E5E8EC';
+      card.style.background  = '#fff';
+    }
+  });
+
+  const lbl = document.getElementById('popupRoleChosen');
+  if (lbl) { lbl.style.display='block'; lbl.textContent = role==='manager' ? '👔 Manager selected' : '👤 Sales Rep selected'; }
+
+  updatePopupBtn();
+}
+
+function updatePopupBtn() {
+  const name = document.getElementById('popupName').value.trim();
+  const btn  = document.getElementById('popupConfirmBtn');
+  const ready = _chosenRole && name.length > 0;
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.disabled = !ready;
+  btn.style.cursor = ready ? 'pointer' : 'default';
+}
+
+function confirmRoleWithName() {
+  const name = document.getElementById('popupName').value.trim();
+  if (!name || !_chosenRole) { showToast('⚠ Select a role and enter your name'); return; }
+
+  document.getElementById('repName').value = name;
+  if (_chosenRole === 'manager') {
+    setSelectVal('roleSelect', 'Coaching People Manager');
+  } else {
+    setSelectVal('roleSelect', 'Sales Rep');
+  }
+  applyFilters();
+  loadCommentsForCurrentRep();
+  refreshSavedReportsCount();
+  renderCumulativePanel(); // load cumulative for this user+role
+
+  document.getElementById('rolePopup').style.display = 'none';
+  showToast(`Welcome, ${name}! 👋`);
+
+  // Update role badge in toolbar
+  const icon = _chosenRole === 'manager' ? '👔' : '👤';
+  const label = _chosenRole === 'manager' ? 'Manager' : 'Sales Rep';
+  document.getElementById('roleBadgeIcon').textContent = icon;
+  document.getElementById('roleBadgeText').textContent = label + ' · ' + name;
+
+  localStorage.setItem('atm_last_name', name);
+  localStorage.setItem('atm_last_role', _chosenRole);
+}
+
+// ── HIERARCHY — hardcoded from ATM_RLS.xlsx ───────────────────────────
+// Row format: Manager | Rep
+// Arslan → Hassan, arsal, Hussan, Mala
+// usman  → zab, Tuba, mar, zar
+// waleed → wee, zee, bau
+// Case-insensitive matching
+const HARDCODED_RLS = {
+  'arslan': ['hassan','arsal','hussan','mala'],
+  'usman':  ['zab','tuba','mar','zar'],
+  'waleed': ['wee','zee','bau'],
+};
+
+// Also load from localStorage if user uploaded their own file
+try {
+  const h = localStorage.getItem('atm_hierarchy');
+  if (h) _managerRepMap = JSON.parse(h);
+} catch(e) {}
+
+function getRepListForManager(managerName) {
+  const nameLower = managerName.toLowerCase();
+  // Check uploaded file first, then hardcoded
+  const fromUpload = _managerRepMap[managerName] || _managerRepMap[nameLower] ||
+    Object.entries(_managerRepMap).find(([k])=>k.toLowerCase()===nameLower)?.[1];
+  if (fromUpload && fromUpload.length > 0) return fromUpload.map(r=>r.toLowerCase());
+  return HARDCODED_RLS[nameLower] || null; // null = not a known manager
+}
+
+function isRepOfManager(repName, managerName) {
+  const reps = getRepListForManager(managerName);
+  if (!reps) return true; // unknown manager sees all (fallback)
+  return reps.includes(repName.toLowerCase());
+}
+
+function triggerHierarchyUpload() {
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='.xlsx,.xls,.csv';
+  inp.onchange = e => parseHierarchyFile(e.target.files[0]);
+  inp.click();
+}
+
+function parseHierarchyFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const wb   = XLSX.read(ev.target.result, {type:'array'});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      _managerRepMap = {};
+      rows.forEach(row => {
+        const mgr = String(row[0]||'').trim();
+        const rep = String(row[1]||'').trim();
+        if (!mgr || !rep || mgr.toLowerCase()==='manager') return;
+        if (!_managerRepMap[mgr]) _managerRepMap[mgr] = [];
+        _managerRepMap[mgr].push(rep);
+      });
+      const managerName = document.getElementById('popupName').value.trim();
+      const myReps = getRepListForManager(managerName) || [];
+      document.getElementById('hierarchyFileName').textContent =
+        `✅ ${Object.keys(_managerRepMap).length} managers loaded · Your reps: ${myReps.length}`;
+      localStorage.setItem('atm_hierarchy', JSON.stringify(_managerRepMap));
+      showToast(`✅ Hierarchy loaded — ${myReps.length} reps for ${managerName}`);
+    } catch(e) {
+      showToast('❌ Could not parse file: '+e.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── FILTERED SAVED PANEL (RLS enforced) ──────────────────────────────
+function renderSavedPanel() {
+  const allReports = getStoredReports();
+  const myName     = document.getElementById('repName').value.trim();
+  const isManager  = window._currentRole === 'manager';
+  const body       = document.getElementById('savedPanelBody');
+
+  if (!isManager) {
+    // REP: only their own reports
+    const mine = allReports.filter(r => r.name.toLowerCase() === myName.toLowerCase());
+    if (mine.length === 0) {
+      body.innerHTML = `<div class="saved-empty">No saved reports yet.<br>Enter data and click Save Report.</div>`;
+      return;
+    }
+    body.innerHTML = mine.slice().reverse().map(r => renderReportCard(r, false, false)).join('');
+    return;
+  }
+
+  // MANAGER: own report first (blue badge), then reps only (RLS), never other managers
+  const myRepList   = getRepListForManager(myName) || [];
+  const allMgrNames = Object.keys(HARDCODED_RLS); // known managers (lowercase keys)
+
+  const myOwnReports = allReports.filter(r => r.name.toLowerCase() === myName.toLowerCase());
+  const repReports   = allReports.filter(r => {
+    const rLower = r.name.toLowerCase();
+    return myRepList.includes(rLower) && !allMgrNames.includes(rLower);
+  });
+
+  if (myOwnReports.length === 0 && repReports.length === 0) {
+    const knownMgrs = Object.keys(HARDCODED_RLS).join(', ');
+    body.innerHTML = `<div class="saved-empty" style="color:#B45309;background:#FEF3E2;border:1px solid #F5DDB8;border-radius:8px;padding:14px;font-size:12px;">
+      No reports found.<br><br>
+      ${myRepList.length>0
+        ? `Your reps: <b>${myRepList.join(', ')}</b> — none have saved reports yet.`
+        : `⚠ Manager "<b>${escHtml(myName)}</b>" not found.<br>Known managers: <b>${knownMgrs}</b>`}
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  if (myOwnReports.length > 0) {
+    html += `<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#0071C5;margin-bottom:6px;padding:0 2px;">👔 Your Report</div>`;
+    html += myOwnReports.slice().reverse().map(r => renderReportCard(r, false, true)).join('');
+  }
+  if (repReports.length > 0) {
+    html += `<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6B717A;margin:${myOwnReports.length>0?'14':'0'}px 0 6px;padding:0 2px;">👤 Your Reps (${repReports.length})</div>`;
+    html += repReports.slice().reverse().map(r => renderReportCard(r, true, false)).join('');
+  } else if (myRepList.length > 0) {
+    html += `<div style="font-size:11px;color:#9AA0A9;padding:10px 0;">None of your reps have saved a report yet.</div>`;
+  }
+  body.innerHTML = html;
+}
+
+function renderReportCard(r, isManagerViewingRep, isOwnReport) {
+  const d = new Date(r.savedAt);
+  const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const nComments = ['q1','q2','q3','q4'].reduce((a,q)=>a+getComments_byRep(r.name,q).length, 0);
+  return `<div class="saved-report-card" style="border-color:${isOwnReport?'#0071C5':'#E5E8EC'};background:${isOwnReport?'#E8F3FB':'#fff'};">
+    <div class="src-name">${escHtml(r.name)}
+      ${isOwnReport?'<span style="font-size:9px;background:#0071C5;color:#fff;border-radius:50px;padding:2px 7px;margin-left:6px;font-weight:700;">YOU</span>':''}
+      ${nComments>0?`<span style="font-size:10px;background:#E8F3FB;color:#0071C5;border-radius:50px;padding:1px 7px;margin-left:4px;">💬 ${nComments}</span>`:''}
+    </div>
+    <div class="src-meta">${escHtml(r.role)} · ${escHtml(r.acct)} · ${escHtml(r.biz)} · ${escHtml(r.instr)}</div>
+    <div class="src-meta">${dateStr}</div>
+    <div class="src-ytd">$${(r.ytd||0).toLocaleString('en-US')}</div>
+    <div class="src-actions">
+      <button class="src-load-btn" onclick="loadReport(${r.id})">Load Report</button>
+      ${!isManagerViewingRep?`<button class="src-del-btn" onclick="deleteReport(${r.id},event)">Delete</button>`:''}
+    </div>
+  </div>`;
+}
+
+function getComments_byRep(repName, q) {
+  try { return JSON.parse(localStorage.getItem(`atm_comments_${repName}_${q}`) || '[]'); }
+  catch(e) { return []; }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── CUMULATIVE EARNINGS — per filter combination ───────────────────────
+// When rep changes Account / Business / Instrument, each unique combo's
+// earnings are saved and shown in the YTD summary card as a running total
+// ══════════════════════════════════════════════════════════════════════
+const CUM_KEY_PREFIX = 'atm_cum_';
+
+function getCumulativeKey() {
+  const name = document.getElementById('repName').value.trim() || '__default__';
+  const role = window._currentRole || 'rep';
+  return `${CUM_KEY_PREFIX}${role}_${name}`; // role+name scoped — each person has their own
+}
+
+function getCumulativeData() {
+  try { return JSON.parse(localStorage.getItem(getCumulativeKey()) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function getFilterComboLabel() {
+  const acct  = document.getElementById('accountSelect').value;
+  const biz   = document.getElementById('businessSelect').value;
+  const instr = document.getElementById('instrumentSelect').value.trim();
+  return `${acct} | ${biz} | ${instr}`;
+}
+
+function saveCurrentEarningsToCumulative() {
+  const ytd = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0), 0);
+  if (ytd === 0) return; // don't save empty
+  const data  = getCumulativeData();
+  const combo = getFilterComboLabel();
+  const prev  = data[combo] || { q1:0, q2:0, q3:0, q4:0, total:0 };
+
+  data[combo] = {
+    q1:    E.q1.total||0, q2:    E.q2.total||0,
+    q3:    E.q3.total||0, q4:    E.q4.total||0,
+    total: ytd,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(getCumulativeKey(), JSON.stringify(data));
+  renderCumulativePanel();
+  showToast('✅ Earnings saved for: ' + combo);
+}
+
+function clearCumulativeCombo(combo) {
+  const data = getCumulativeData();
+  delete data[combo];
+  localStorage.setItem(getCumulativeKey(), JSON.stringify(data));
+  renderCumulativePanel();
+  showToast('🗑 Removed: ' + combo);
+}
+
+function clearAllCumulative() {
+  localStorage.removeItem(getCumulativeKey());
+  renderCumulativePanel();
+  showToast('🗑 All cumulative records cleared');
+}
+
+function renderCumulativePanel() {
+  const data    = getCumulativeData();
+  const combos  = Object.keys(data);
+  const panel   = document.getElementById('cumulativePanel');
+  if (!panel) return;
+
+  if (combos.length === 0) {
+    panel.innerHTML = `<div style="font-size:11px;color:#9AA0A9;padding:8px 0;">No records yet. Select filters, enter values, then click "Save to Cumulative".</div>`;
+    return;
+  }
+
+  const grandTotal = combos.reduce((s,k) => s + (data[k].total||0), 0);
+
+  let html = combos.map(combo => {
+    const d = data[combo];
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F1F3F5;">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#3D4350;">${escHtml(combo)}</div>
+        <div style="font-size:10px;color:#9AA0A9;">Q1:${fmt(d.q1)} Q2:${fmt(d.q2)} Q3:${fmt(d.q3)} Q4:${fmt(d.q4)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#0071C5;">${fmt(d.total)}</span>
+        <span onclick="clearCumulativeCombo('${escHtml(combo).replace(/'/g,'\\\'')}')" style="cursor:pointer;color:#C0392B;font-size:12px;padding:2px 5px;border-radius:4px;background:#FDECEB;">✕</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 4px;border-top:2px solid #0071C5;margin-top:4px;">
+    <span style="font-size:11px;font-weight:700;color:#0071C5;text-transform:uppercase;letter-spacing:0.5px;">Combined Total</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;color:#0071C5;">${fmt(grandTotal)}</span>
+  </div>`;
+
+  panel.innerHTML = html;
+
+  // Update the combined total in YTD chip
+  document.getElementById('cumulativeTotal').textContent = fmt(grandTotal);
+  document.getElementById('cumulativeTotalRow').style.display = combos.length > 1 ? 'flex' : 'none';
+}
+
+function exportCumulativeToExcel() {
+  const data    = getCumulativeData();
+  const combos  = Object.keys(data);
+  if (combos.length === 0) { showToast('⚠ No cumulative data to export'); return; }
+
+  const name    = document.getElementById('repName').value.trim() || 'Rep';
+  const role    = document.getElementById('roleSelect').value;
+  const ytd     = ['q1','q2','q3','q4'].reduce((s,q)=>s+(E[q].total||0),0);
+  const grandTotal = combos.reduce((s,k)=>s+(data[k].total||0),0);
+  const today   = new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+
+  const aoa = [
+    [`Abbott ATM — Cumulative SPIF Earnings · ${name} · ${today}`,'','','','',''],
+    [],
+    ['Filter Combination','Q1','Q2','Q3','Q4','Total'],
+    ...combos.map(combo => {
+      const d = data[combo];
+      return [combo, d.q1||0, d.q2||0, d.q3||0, d.q4||0, d.total||0];
+    }),
+    [],
+    ['Grand Total (All Combos)','','','','', grandTotal],
+    [],
+    ['Current Selection YTD','','','','', ytd],
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:40},{wch:12},{wch:12},{wch:12},{wch:12},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Cumulative');
+  XLSX.writeFile(wb, `ATM_Cumulative_${name.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('✅ Cumulative Excel exported!');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── GMAIL INTEGRATION ─────────────────────────────────────────────────
+// ── Uses Gmail API via OAuth2 (GAPI) — requires Google Client ID ──────
+// ══════════════════════════════════════════════════════════════════════
+
+// ⚙ CONFIGURATION — paste your Google OAuth Client ID here
+// Get it free: console.cloud.google.com → New Project → APIs & Services
+// → Credentials → OAuth 2.0 Client ID → Web application
+// Authorized JS origins: add the URL where this file is hosted (or http://localhost)
+const GOOGLE_CLIENT_ID = ''; // ← PASTE YOUR CLIENT ID HERE e.g. '123456789.apps.googleusercontent.com'
+const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+
+let _gmailToken   = null;
+let _gmailEmail   = null;
+let _gapiReady    = false;
+
+async function loadGapiScript() {
+  if (window.google?.accounts) return;
+  await new Promise((res,rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function updateGmailStatus() {
+  const bar = document.getElementById('gmailStatusBar');
+  const connectBtn = document.getElementById('gmailConnectBtn');
+  if (_gmailToken && _gmailEmail) {
+    bar.style.background='#ECFDF5'; bar.style.border='1px solid #A7F3D0'; bar.style.color='#065F46';
+    bar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <b>Gmail connected:</b> ${escHtml(_gmailEmail)} — ready to send`;
+    document.getElementById('emailFrom').value = _gmailEmail;
+    connectBtn.style.display='none';
+  } else if (!GOOGLE_CLIENT_ID) {
+    bar.style.background='#FEF9C3'; bar.style.border='1px solid #FDE68A'; bar.style.color='#92400E';
+    bar.innerHTML = `⚠ <b>Gmail not configured.</b> Paste your Google Client ID in the HTML to enable direct Gmail send. Will use Outlook fallback.`;
+    connectBtn.style.display='none';
+  } else {
+    bar.style.background='#EFF6FF'; bar.style.border='1px solid #BFDBFE'; bar.style.color='#1D4ED8';
+    bar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Click <b>Connect Gmail</b> to sign in and send directly from your Gmail account.`;
+  }
+}
+
+async function connectGmail() {
+  if (!GOOGLE_CLIENT_ID) { showToast('⚠ No Google Client ID configured'); return; }
+  try {
+    await loadGapiScript();
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GMAIL_SCOPE,
+      callback: async (resp) => {
+        if (resp.error) { showToast('❌ Gmail auth failed: '+resp.error); return; }
+        _gmailToken = resp.access_token;
+        // Get user email
+        const me = await fetch('https://www.googleapis.com/gmail/v1/users/me/profile', {
+          headers: { Authorization: 'Bearer '+_gmailToken }
+        }).then(r=>r.json());
+        _gmailEmail = me.emailAddress;
+        updateGmailStatus();
+        showToast('✅ Gmail connected: '+_gmailEmail);
+      }
+    });
+    client.requestAccessToken();
+  } catch(e) {
+    showToast('❌ Could not load Google auth: '+e.message);
+  }
+}
+
+async function sendViaGmail(to, cc, subject, bodyText) {
+  // Build RFC 2822 email message
+  const from    = _gmailEmail;
+  const headers = [
+    `From: ${from}`,
+    `To: ${to}`,
+    cc ? `Cc: ${cc}` : '',
+    `Subject: ${subject}`,
+    `Content-Type: text/plain; charset=utf-8`,
+    `MIME-Version: 1.0`,
+    '',
+    bodyText
+  ].filter(l => l !== null).join('\r\n');
+
+  const encoded = btoa(unescape(encodeURIComponent(headers)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+
+  const resp = await fetch('https://www.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer '+_gmailToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ raw: encoded })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.error?.message || 'Gmail send failed');
+  }
+  return resp.json();
+}
+
+async function sendEmailAction() {
+  const to      = document.getElementById('emailTo').value.trim();
+  const cc      = document.getElementById('emailCc').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const userMsg = document.getElementById('emailBody').value.trim();
+  const attach  = document.getElementById('attachPdf').checked;
+
+  if (!to) { showToast('⚠ Please enter recipient email'); document.getElementById('emailTo').focus(); return; }
+
+  const fullBody = (userMsg ? userMsg+'\n\n---\n\n' : '') + buildEmailBody();
+
+  // Download PDF if checked
+  if (attach) {
+    try {
+      await downloadPdfOnly();
+      await new Promise(r=>setTimeout(r,800));
+    } catch(e) { console.warn('PDF generation failed:', e); }
+  }
+
+  // Try Gmail direct send first
+  if (_gmailToken && _gmailEmail) {
+    try {
+      showToast('⏳ Sending via Gmail…', 8000);
+      await sendViaGmail(to, cc, subject, fullBody);
+      closeEmailModal();
+      showToast('✅ Email sent via Gmail!');
+      return;
+    } catch(e) {
+      showToast('⚠ Gmail send failed — opening Outlook. '+e.message, 5000);
+    }
+  }
+
+  // Fallback: Outlook mailto
+  let mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+  if (cc) mailto += `&cc=${encodeURIComponent(cc)}`;
+  window.location.href = mailto;
+  closeEmailModal();
+  showToast('📧 Opening Outlook…');
+}
+
+// Override openEmailModal to init Gmail status
+const _origOpenEmail = openEmailModal;
+function openEmailModal() {
+  const name = document.getElementById('repName').value.trim() || 'Rep';
+  document.getElementById('emailSubject').value = `SPIF Report — ${name} — ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;
+  document.getElementById('emailBody').value = `Hi,\n\nPlease find my Q${new Date().getMonth()<3?1:new Date().getMonth()<6?2:new Date().getMonth()<9?3:4} SPIF report attached and summarized below.\n\nBest regards,\n${name}`;
+  document.getElementById('emailModal').classList.add('open');
+  updateGmailStatus();
+  setTimeout(()=>document.getElementById('emailTo').focus(), 120);
+}
+
+// ── ON PAGE LOAD: show role popup ─────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const lastName = localStorage.getItem('atm_last_name');
+  const lastRole = localStorage.getItem('atm_last_role');
+  if (lastName && lastRole) {
+    _chosenRole = lastRole;
+    window._currentRole = lastRole;
+    document.getElementById('repName').value = lastName;
+    if (lastRole==='manager') setSelectVal('roleSelect','Coaching People Manager');
+    else setSelectVal('roleSelect','Sales Rep');
+
+    // Update role badge
+    const icon  = lastRole === 'manager' ? '👔' : '👤';
+    const label = lastRole === 'manager' ? 'Manager' : 'Sales Rep';
+    document.getElementById('roleBadgeIcon').textContent = icon;
+    document.getElementById('roleBadgeText').textContent = label + ' · ' + lastName;
+
+    applyFilters();
+    loadCommentsForCurrentRep();
+    refreshSavedReportsCount();
+    renderCumulativePanel();
+    document.getElementById('rolePopup').style.display = 'none';
+
+    // "Switch Role" pill bottom-left
+    const switchBtn = document.createElement('div');
+    switchBtn.id = 'switchRoleBtn';
+    switchBtn.style.cssText = 'position:fixed;bottom:20px;left:16px;z-index:200;background:#fff;border:1px solid #E5E8EC;border-radius:50px;padding:6px 14px;font-size:11px;font-weight:600;color:#6B717A;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.10);display:flex;align-items:center;gap:6px;';
+    switchBtn.innerHTML = `${icon} <span>${lastName}</span> <span style="color:#9AA0A9;font-size:10px;">· Switch</span>`;
+    switchBtn.onclick = () => {
+      localStorage.removeItem('atm_last_name');
+      localStorage.removeItem('atm_last_role');
+      location.reload();
+    };
+    document.body.appendChild(switchBtn);
+  }
+});
+</script>
+</body>
+</html>
